@@ -1,0 +1,2 @@
+main: main.cpp Command.cpp DatabaseMap.cpp Database.cpp Table.cpp Row.cpp Command.h DatabaseMap.h Database.h Table.h Row.h
+	g++ main.cpp Command.cpp DatabaseMap.cpp Database.cpp Table.cpp Row.cpp -o main -std=c++14
