@@ -1,4 +1,4 @@
-﻿#include "DatabaseMap.h"
+#include "DatabaseMap.h"
 void DatabaseMap::CreateDatabase(std::string db_name) {
 	dbs[db_name] = Database(db_name);           //创立数据库
 }

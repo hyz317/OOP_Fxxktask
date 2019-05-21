@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <string>
 #include <sstream>
 #include "DatabaseMap.h"
@@ -20,5 +20,5 @@ void Show(std::stringstream& ss);
 void Update(std::stringstream& ss);
 void Insert(std::stringstream& ss);
 void Delete(std::stringstream& ss);
-void Select(std::stringstream& ss);
+void Select(std::stringstream& ss,bool foutput=false);
 //void Count(std::stringstream& ss);//tmd 

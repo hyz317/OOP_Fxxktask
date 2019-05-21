@@ -19,7 +19,7 @@ int main()
 		}*/
 		Command a(command);
 		a.operate();
-		clause_deal(cmd);
+		clause_deal(cmd,command);
 	//	cout<<cmd<<endl;
 	} 
 }

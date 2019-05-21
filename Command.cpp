@@ -36,7 +36,7 @@ void Command::operate() {
 	else if (cmd_type == "DELETE" || cmd_type == "delete") {
 		Delete(ss);
 	}
-	else if (cmd_type == "SELECT" || cmd_type == "select") {
+	else if ((cmd_type == "SELECT" || cmd_type == "select")&&command.find("OUTFILE")==-1) {	
 		Select(ss);
 	}
 	else {
@@ -408,32 +408,45 @@ void OutputData(std::string value, std::string type) {
 void Count(std::stringstream& ss){
 	
 }
-void Select(std::stringstream& ss) {
+void Select(std::stringstream& ss,bool foutput) {
 	std::vector<std::string> attr_name;
 	std::string tmp = "";
 	ss >> tmp;
-	
-	while (tmp!="from" && tmp!="FROM") { 
-		attr_name.push_back(tmp);
-		ss >> tmp;
+	if(!foutput){
+		while (tmp!="from" && tmp!="FROM") { //把要select的attrName挑出来 
+			attr_name.push_back(tmp);
+			ss >> tmp;
+		}
 	}
-	cout<<"attr"<<attr_name[0]<<endl;
+	else{
+		ss>>tmp;
+		while (tmp!="into" && tmp!="INTO") { //把要select的attrName挑出来 
+			attr_name.push_back(tmp);
+			ss >> tmp;
+		}
+		ss>>tmp>>tmp>>tmp;
+	}
+	//cout<<"attr"<<attr_name[0]<<endl; 
+	/*
 	if(attr_name[0].find("COUNT")!=-1)
 	{
 		int bg=attr_name[0].find("(");
 		int ed=attr_name[0].find(")");
 		
 	}
+	*/
 	if (attr_name[0] == "*") {
 		std::string table_name;
 		ss >> table_name;
 		tmp = "";
 		ss >> tmp;
 		if (tmp == "") {
-			//table_name = table_name.substr(0, table_name.length() - 1);	
+			//table_name = table_name.substr(0, table_name.length() - 1);
 			std::set<Data> key_of_rows = DB.GetAllKeys(table_name);
 			if(key_of_rows.begin() != key_of_rows.end())
-			DB.OutputAttr(table_name);
+			if(!foutput){
+				DB.OutputAttr(table_name);
+			}
 			for (auto i = key_of_rows.begin(); i != key_of_rows.end(); i++) {
 				DB.OutputRow(table_name, (*i).value);
 			}
@@ -445,7 +458,9 @@ void Select(std::stringstream& ss) {
 			getline(ss, clause, ';');
 			trim(clause);
 			std::set<Data> key_of_rows = where_clause(table_name, clause);
-			DB.OutputAttr(table_name);
+			if(!foutput){
+				DB.OutputAttr(table_name);
+			}
 			for (auto i = key_of_rows.begin(); i != key_of_rows.end(); i++) {
 				DB.OutputRow(table_name, (*i).value);
 			}
@@ -460,10 +475,12 @@ void Select(std::stringstream& ss) {
 		ss >> tmp;
 		if (tmp == "") {
 			//table_name = table_name.substr(0, table_name.length() - 1);
-			for (auto i = attr_name.begin(); i < attr_name.end() - 1; i++) {
-				std::cout << (*i) << "\t";
+			if(!foutput){
+				for (auto i = attr_name.begin(); i < attr_name.end() - 1; i++) {
+					std::cout << (*i) << "\t";
+				}
+				std::cout << *(attr_name.end()-1) << "\n" ;
 			}
-			std::cout << *(attr_name.end()-1) << "\n" ;
 			std::set<Data> key_of_rows = DB.GetAllKeys(table_name);
 			for (auto i = key_of_rows.begin(); i != key_of_rows.end(); i++) {
 				for (int j = 0; j < attr_name.size() - 1; j++) {
@@ -480,10 +497,12 @@ void Select(std::stringstream& ss) {
 			return;
 		}
 		else {
-			for (auto i = attr_name.begin(); i < attr_name.end() - 1; i++) {
-				std::cout << (*i) << "\t";
+			if(!foutput){
+				for (auto i = attr_name.begin(); i < attr_name.end() - 1; i++) {
+					std::cout << (*i) << "\t";
+				}
+				std::cout << *(attr_name.end()-1) << "\n" ;
 			}
-			std::cout << *(attr_name.end() - 1) << "\n" ;
 			//ss >> tmp;   //WHERE
 			std::string clause;
 			getline(ss, clause, ';');

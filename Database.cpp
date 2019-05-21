@@ -1,4 +1,4 @@
-﻿#include "Database.h"
+#include "Database.h"
 
 void Database::CreateTable(std::string table_name, std::vector<Attribute> attr, std::string _key) {
 	table_list[table_name] = Table(attr, _key);

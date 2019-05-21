@@ -1,4 +1,4 @@
-﻿#include"Table.h"
+#include"Table.h"
 
 bool Data::operator< (const Data d) const {
 	if (type == "int") {

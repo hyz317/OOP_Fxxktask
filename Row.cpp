@@ -1,4 +1,4 @@
-﻿#include"Row.h"
+#include"Row.h"
 #include"Table.h"
 
 void Row::into(Table* ta, std::vector<std::string> attr_name, std::vector<std::string> value) {
