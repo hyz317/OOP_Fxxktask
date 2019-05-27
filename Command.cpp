@@ -11,7 +11,7 @@ using namespace std;
 void Command::operate() {
 	std::stringstream ss(command);
 	std::string cmd_type;
-	cout<<__FUNCTION__<<"cmd:"<<command<<command<<endl;
+//	cout<<__FUNCTION__<<"cmd:"<<command<<command<<endl;
 	ss >> cmd_type;
 //	string word2;
 //	ss >> word2;//第二个单词 
@@ -36,7 +36,7 @@ void Command::operate() {
 	else if (cmd_type == "DELETE" || cmd_type == "delete") {
 		Delete(ss);
 	}
-	else if ((cmd_type == "SELECT" || cmd_type == "select")&&command.find("OUTFILE")==-1) {	
+	else if ((cmd_type == "SELECT" || cmd_type == "select")&&command.find("OUTFILE")==-1&&command.find("GROUP")==-1) {	
 		Select(ss);
 	}
 	else {

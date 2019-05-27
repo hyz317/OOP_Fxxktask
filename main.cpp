@@ -13,7 +13,7 @@ int main()
 	char cmd[1200];
 	while (cin.getline( cmd,1100, ';')){
 		command=cmd;
-		cout<<"comd="<<cmd<<endl;
+	//	cout<<"comd="<<cmd<<endl;
 	/*	if(command == "\n"){
 			break;
 		}*/
