@@ -1,15 +1,18 @@
 #include "clause_deal.h"
 #include "Database.h"
 #include "DatabaseMap.h"
+#include "Command.h"
 #include "Row.h"
 #include <cstring>
 #include <fstream>
 #include <sstream>
 extern DatabaseMap DB;
 using namespace std;
-void Select(std::stringstream& ss,bool foutput=false);
-void Group_by(string*,int);
+//void Select(std::stringstream& ss,bool foutput=false);
+void Group_by(string*,int, string s = "");
 int Find(string*,string,int);
+void NewSelect(string*, int, string, string order_by_attr = "");
+string GetOrderbyType(string table_name, string order_by_attr);
 void clause_deal(char* cmd,string command)
 {
 	cout<<"deal"<<endl;
@@ -18,12 +21,12 @@ void clause_deal(char* cmd,string command)
 		string scmd=cmd;//做备份（之后要用strtok）
 		string WhereString;
 	//rr的clause tree可以当作附加功能，不用它的那个select里面的 
-	/*	Wherenode *rootnode = nullptr;
+	//	Wherenode *rootnode = nullptr;
 		if(scmd.find("WHERE") != -1) {
 			WhereString = scmd.substr(scmd.find("WHERE") + 6);
-			rootnode = new Wherenode;
-			rootnode->prev = nullptr;
-		}*/ 
+		//	rootnode = new Wherenode;
+		//	rootnode->prev = nullptr;
+		} 
 	//	cout<<__FUNCTION__<<__LINE__<<endl; 
 		char *pdeal;//用于处理命令的指针 
 		string word[100];//把每条命令抽成单词 
@@ -62,14 +65,36 @@ void clause_deal(char* cmd,string command)
 				cout.rdbuf(ocb);
 			}
 		}
+		//wtr的第一个特判，select + count + groupby 
 		if(Find(word,"SELECT",how_many_word)!=-1&&Find(word,"COUNT",how_many_word)!=-1&&
-		Find(word,"GROUP",how_many_word)!=-1&&Find(word,"SORT",how_many_word)==-1)Group_by(word,how_many_word); 
+		Find(word,"GROUP",how_many_word)!=-1&&Find(word,"ORDER",how_many_word)==-1)Group_by(word,how_many_word); 
+		
+		//新加的第二个特判，select + count + groupby + orderby 
+		if(Find(word,"SELECT",how_many_word)!=-1&&Find(word,"COUNT",how_many_word)!=-1&&
+		Find(word,"GROUP",how_many_word)!=-1&&Find(word,"ORDER",how_many_word)!=-1)Group_by(word,how_many_word,word[Find(word,"ORDER",how_many_word)+2]); 
+		
+		//新加的第三个特判，select + count + orderby 
+		if(Find(word,"SELECT",how_many_word)!=-1&&Find(word,"COUNT",how_many_word)==-1&&
+		Find(word,"GROUP",how_many_word)==-1&&Find(word,"ORDER",how_many_word)!=-1) NewSelect(word,how_many_word,WhereString,word[Find(word,"ORDER",how_many_word)+2]); 
 //		printTempDatabaseOverall(tmp_database); // 全局输出调试语句 
 	
 }
 
+bool OrderByCompare2(const string &a1, const string &a2, string type) // 一个判断两个 value 大小的函数 
+{
+	if(a1 == "NULL")
+		return a1 < a2;
+	if(a2 == "NULL")
+		return a2 < a1;
+	if(type == "int")
+		return stoi(a1) < stoi(a2);
+	if(type == "double")
+		return stod(a1) < stod(a2);
+	if(type == "char")
+		return a1 < a2; 
+} 
 
-int Find(string *word,string keyword,int how_many_word)
+int Find(string *word,string keyword,int how_many_word) // 从 string 数组中找正确的下标 
 {
 	for(int i=0;i<how_many_word;i++)
 	{
@@ -81,7 +106,7 @@ int Find(string *word,string keyword,int how_many_word)
 //select 是选择输出
 //count 是选择计数
 //group by是归哪些列 
-void Group_by(string *word,int how_many_word)
+void Group_by(string *word,int how_many_word, string order_by_attr) // order_by_attr 是可能存在的需要 orderby 的列 
 {
 	cout<<"groupby"<<endl;
 	//获得count group的index 
@@ -90,7 +115,7 @@ void Group_by(string *word,int how_many_word)
 	string count_col=word[count_index+1]; 
 
 	vector<string> basic;
-	for(int i=group_index+2;i<how_many_word;i++)
+	for(int i=group_index+2;i<how_many_word && word[i]!="ORDER";i++)
 	{
 		cout<<"want to push "<<word[i]<<endl;
 		basic.push_back(word[i]);
@@ -126,31 +151,73 @@ void Group_by(string *word,int how_many_word)
 		else group[tmp_row]++;
 	}
 	int index[10];//记录对应关系 要输出的第i个列对应vector中的第几个
+	int num_of_attr = -1; // 记录需要 orderby 的列对应的数字！ 
 	for(int j=1;j<count_index;j++)
 	{
 		for(int i=0;i<basic.size();i++)
 		{
 			if(basic[i]==word[j])
 			{
-				index[j-1]=i;	
+				index[j-1]=i;
+				if(basic[i] == order_by_attr) num_of_attr = j-1;	
 				break;
 			}	
 		}	
 	}
-	cout<<"index"<<index[0]<<endl; 
-	cout<<"COUNT ";
+	cout<<"index"<<index[0]<<endl; 	
 	for(int j=1;j<count_index;j++)
 	{
-		cout<<"\t"<<word[j];
-	}cout<<endl;
+		cout<<word[j]<<'\t';
+	}
+	cout<<"COUNT\n";
 	// \t数量不知道有没有关系 
-    for(auto i:group)
-    {
-		cout<<i.second;//此处还没完善，其实应该判断count有无 
-		for(int j=0;j<count_index-1;j++)
-    	{
-    		cout<<'\t'<<i.first[index[j]];
-		}cout<<endl;
+	//以下是新增的有可能有 orderby 的输出部分 
+	if(order_by_attr == "") // 如果没有 orderby，正常输出 
+	    for(auto i:group)
+	    {
+			for(int j=0;j<count_index-1;j++)
+	    	{
+	    		cout<<i.first[index[j]]<<"\t";
+			}
+			cout<<i.second;//此处还没完善，其实应该判断count有无 
+			cout<<endl;
+		}
+	else if(order_by_attr != "COUNT") { // 如果有 orderby 且不是 order Count(*)这一列 
+		string tmp_type = GetOrderbyType(word[count_index+3], order_by_attr);
+
+		while(!group.empty()) {
+			vector<string> nowvector = (*group.begin()).first;
+			for (auto i: group) {
+				if(OrderByCompare2(i.first[index[num_of_attr]], nowvector[index[num_of_attr]], tmp_type))
+					nowvector = i.first;
+			} // 找到orderby列最小的行 
+			for(int j=0;j<count_index-1;j++)
+	    	{
+	    		cout<<nowvector[index[j]]<<'\t';
+			} // 输出这行的信息 
+			cout<<group[nowvector];//此处还没完善，其实应该判断count有无 
+			cout<<endl;
+			group.erase(nowvector);//输出该行信息后将该行从map中移出，重新寻找最小的行，直到map为空 
+		}
+	}
+	else { // 如果有 orderby 且是 order Count(*)这一列 
+		while(!group.empty()) {
+			int minm = (1<<30);
+			vector<string> nowvector = (*group.begin()).first;
+			for (auto i: group) {
+				if(i.second < minm) {
+					minm = i.second;
+					nowvector = i.first;
+				}
+			} // 找到orderby列最小的行 
+			for(int j=0;j<count_index-1;j++)
+	    	{
+	    		cout<<nowvector[index[j]]<<'\t';
+			} // 输出这行的信息 
+			cout<<group[nowvector];//此处还没完善，其实应该判断count有无 
+			cout<<endl;
+			group.erase(nowvector);
+		}
 	}
 }
 void Count(string* word)
@@ -179,4 +246,187 @@ void Count(string* word)
 	}
 }
 
+string GetOrderbyType(string table_name, string order_by_attr) // 用于返回需要 orderby 的列的类型 int char double 
+{
+	for(auto i:DB.current_db->table_list[table_name].attr_list){
+		if(i.name == order_by_attr)
+			return i.type;
+	}
+}
+
+bool OrderByCompare(string table_name, string order_by_attr, const Data& a1, const Data& a2, string type) //用于比较两个行所对应orderby列的值的大小 
+{
+	if(DB.current_db->table_list[table_name].row_map[a1].data[order_by_attr] == "NULL")
+		return a1 < a2;
+	else if(DB.current_db->table_list[table_name].row_map[a2].data[order_by_attr] == "NULL")
+		return a2 < a1;
+	else if(type == "int")
+		return stoi(DB.current_db->table_list[table_name].row_map[a1].data[order_by_attr]) < stoi(DB.current_db->table_list[table_name].row_map[a2].data[order_by_attr]);
+	else if(type == "double")
+		return stod(DB.current_db->table_list[table_name].row_map[a1].data[order_by_attr]) < stod(DB.current_db->table_list[table_name].row_map[a2].data[order_by_attr]);
+	else if(type == "char")
+		return DB.current_db->table_list[table_name].row_map[a1].data[order_by_attr] < DB.current_db->table_list[table_name].row_map[a2].data[order_by_attr];
+}
+
+void NewSelect(string *word, int how_many_word, string wherestring, string order_by_attr) { // 用于处理 select + orderby 的情况 
+	cout<<"NewSelect\n";
+	cout<<"wherestring "<<wherestring<<endl<<"order_by_attr "<<order_by_attr<<endl;
+	int count_index = Find(word, "COUNT", how_many_word);
+	int from_index = Find(word, "FROM", how_many_word);
+	int where_index = Find(word, "WHERE", how_many_word);
+	
+	std::string table_name;	
+	std::vector<std::string> attr_name;
+	
+	for(int i = 1; word[i] != "FROM"; i++)
+		attr_name.push_back(word[i]); // 把所有 select 的列均放入 attr_name 这个 vector 里面备用 
+	if (attr_name[0] == "*") {
+			
+		table_name = word[from_index + 1]; // 获取当前 table 
+		if (where_index == -1) {
+			//table_name = table_name.substr(0, table_name.length() - 1);
+			std::set<Data> key_of_rows = DB.GetAllKeys(table_name); // 获取所有行 
+			if(key_of_rows.begin() != key_of_rows.end()) // 非空就输出表头 
+				DB.OutputAttr(table_name);
+			if(order_by_attr == "") // 如果没有 orderby，那么直接输出 
+				for (auto i = key_of_rows.begin(); i != key_of_rows.end(); i++) {
+					DB.OutputRow(table_name, (*i).value);
+				}
+			else { // 如果有 orderby，那么找到最小行，输出，并将这行从set中删除，重复该操作直到set为空 
+				string tmp_type = GetOrderbyType(table_name, order_by_attr);
+				while(!key_of_rows.empty()) {
+					Data nowdata = *key_of_rows.begin();
+					for (auto i: key_of_rows) {
+						if(OrderByCompare(table_name, order_by_attr, i, nowdata, tmp_type))
+							nowdata = i;
+					}
+					DB.OutputRow(table_name, nowdata.value);
+					key_of_rows.erase(nowdata);
+				}
+			}
+			return;
+		}
+		else {
+
+			std::set<Data> key_of_rows = where_clause(table_name, wherestring);
+			if(key_of_rows.begin() != key_of_rows.end())
+				DB.OutputAttr(table_name);
+			if(order_by_attr == "") 
+				for (auto i = key_of_rows.begin(); i != key_of_rows.end(); i++) {
+					DB.OutputRow(table_name, (*i).value);
+				}
+			else {
+				string tmp_type = GetOrderbyType(table_name, order_by_attr);
+				while(!key_of_rows.empty()) {
+					Data nowdata = *key_of_rows.begin();
+					for (auto i: key_of_rows) {
+						if(OrderByCompare(table_name, order_by_attr, i, nowdata, tmp_type))
+							nowdata = i;
+					}
+					DB.OutputRow(table_name, nowdata.value);
+					key_of_rows.erase(nowdata);
+				}
+			}
+			return;
+		}
+
+	}
+	else {
+		
+		table_name = word[from_index + 1];
+		
+		if (where_index == -1) {
+			//table_name = table_name.substr(0, table_name.length() - 1);
+			for (auto i = attr_name.begin(); i < attr_name.end() - 1; i++) {
+				std::cout << (*i) << "\t";
+			}
+			std::cout << *(attr_name.end()-1) << "\n" ;
+			std::set<Data> key_of_rows = DB.GetAllKeys(table_name);
+			
+			if(order_by_attr == "") {
+				for (auto i = key_of_rows.begin(); i != key_of_rows.end(); i++) {
+					for (int j = 0; j < attr_name.size() - 1; j++) {
+						std::string value = DB.GetValue(table_name, attr_name[j], (*i).value);
+						std::string type = DB.GetType(table_name, attr_name[j]);
+						OutputData(value, type);
+						std::cout << "\t";
+					}
+					std::string value = DB.GetValue(table_name, attr_name[attr_name.size()-1], (*i).value);
+					std::string type = DB.GetType(table_name, attr_name[attr_name.size() - 1]);
+					OutputData(value, type);
+					std::cout << "\n";
+				}
+			}
+			else {
+				string tmp_type = GetOrderbyType(table_name, order_by_attr);
+				while(!key_of_rows.empty()) {
+					Data nowdata = *key_of_rows.begin();
+					for (auto i: key_of_rows) {
+						if(OrderByCompare(table_name, order_by_attr, i, nowdata, tmp_type))
+							nowdata = i;
+					}
+					for (int j = 0; j < attr_name.size() - 1; j++) {
+						std::string value = DB.GetValue(table_name, attr_name[j], nowdata.value);
+						std::string type = DB.GetType(table_name, attr_name[j]);
+						OutputData(value, type);
+						std::cout << "\t";
+					}
+					std::string value = DB.GetValue(table_name, attr_name[attr_name.size()-1], nowdata.value);
+					std::string type = DB.GetType(table_name, attr_name[attr_name.size() - 1]);
+					OutputData(value, type);
+					std::cout << "\n";
+
+					key_of_rows.erase(nowdata);
+				}
+			}
+			
+			return;
+		}
+		
+		else {
+			for (auto i = attr_name.begin(); i < attr_name.end() - 1; i++) {
+				std::cout << (*i) << "\t";
+			}
+			std::cout << *(attr_name.end()-1) << "\n" ;
+			std::set<Data> key_of_rows = where_clause(table_name, wherestring);
+			
+			if(order_by_attr == "") {
+				for (auto i = key_of_rows.begin(); i != key_of_rows.end(); i++) {
+					for (int j = 0; j < attr_name.size() - 1; j++) {
+						std::string value = DB.GetValue(table_name, attr_name[j], (*i).value);
+						std::string type = DB.GetType(table_name, attr_name[j]);
+						OutputData(value, type);
+						std::cout << "\t";
+					}
+					std::string value = DB.GetValue(table_name, attr_name[attr_name.size()-1], (*i).value);
+					std::string type = DB.GetType(table_name, attr_name[attr_name.size() - 1]);
+					OutputData(value, type);
+					std::cout << "\n";
+				}
+			}
+			else {
+				string tmp_type = GetOrderbyType(table_name, order_by_attr);
+				while(!key_of_rows.empty()) {
+					Data nowdata = *key_of_rows.begin();
+					for (auto i: key_of_rows) {
+						if(OrderByCompare(table_name, order_by_attr, i, nowdata, tmp_type))
+							nowdata = i;
+					}
+					for (int j = 0; j < attr_name.size() - 1; j++) {
+						std::string value = DB.GetValue(table_name, attr_name[j], nowdata.value);
+						std::string type = DB.GetType(table_name, attr_name[j]);
+						OutputData(value, type);
+						std::cout << "\t";
+					}
+					std::string value = DB.GetValue(table_name, attr_name[attr_name.size()-1], nowdata.value);
+					std::string type = DB.GetType(table_name, attr_name[attr_name.size() - 1]);
+					OutputData(value, type);
+					std::cout << "\n";
+
+					key_of_rows.erase(nowdata);
+				}
+			}
+		}
+	}
+}
 

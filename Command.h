@@ -21,4 +21,5 @@ void Update(std::stringstream& ss);
 void Insert(std::stringstream& ss);
 void Delete(std::stringstream& ss);
 void Select(std::stringstream& ss,bool foutput=false);
+std::set<Data> where_clause(std::string, std::string);
 //void Count(std::stringstream& ss);//tmd 

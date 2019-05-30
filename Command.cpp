@@ -36,7 +36,7 @@ void Command::operate() {
 	else if (cmd_type == "DELETE" || cmd_type == "delete") {
 		Delete(ss);
 	}
-	else if ((cmd_type == "SELECT" || cmd_type == "select")&&command.find("OUTFILE")==-1&&command.find("GROUP")==-1) {	
+	else if ((cmd_type == "SELECT" || cmd_type == "select")&&command.find("OUTFILE")==-1&&command.find("GROUP")==-1&&command.find("ORDER")==-1) {	
 		Select(ss);
 	}
 	else {
@@ -408,6 +408,7 @@ void OutputData(std::string value, std::string type) {
 void Count(std::stringstream& ss){
 	
 }
+
 void Select(std::stringstream& ss,bool foutput) {
 	std::vector<std::string> attr_name;
 	std::string tmp = "";
