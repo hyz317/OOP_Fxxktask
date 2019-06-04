@@ -6,6 +6,7 @@
 #include <cstring>
 #include <fstream>
 #include <sstream>
+#include "Wherenode.h"
 extern DatabaseMap DB;
 using namespace std;
 //void Select(std::stringstream& ss,bool foutput=false);
@@ -13,6 +14,7 @@ void Group_by(string*,int, string s = "");
 int Find(string*,string,int);
 void NewSelect(string*, int, string, string order_by_attr = "");
 string GetOrderbyType(string table_name, string order_by_attr);
+Wherenode *rootnode = nullptr;
 void clause_deal(char* cmd,string command)
 {
 	cout<<"deal"<<endl;
@@ -21,10 +23,11 @@ void clause_deal(char* cmd,string command)
 		string scmd=cmd;//做备份（之后要用strtok）
 		string WhereString;
 	//rr的clause tree可以当作附加功能，不用它的那个select里面的 
-	//	Wherenode *rootnode = nullptr;
+		
 		if(scmd.find("WHERE") != -1) {
 			WhereString = scmd.substr(scmd.find("WHERE") + 6);
-		//	rootnode = new Wherenode;
+			rootnode = new Wherenode;
+			
 		//	rootnode->prev = nullptr;
 		} 
 	//	cout<<__FUNCTION__<<__LINE__<<endl; 
@@ -114,13 +117,13 @@ void Group_by(string *word,int how_many_word, string order_by_attr) // order_by_
 	int group_index=Find(word,"GROUP",how_many_word);
 	string count_col=word[count_index+1]; 
 
-	vector<string> basic;
+	vector<string> basic; // 记录需要 select 的列名 
 	for(int i=group_index+2;i<how_many_word && word[i]!="ORDER";i++)
 	{
 		cout<<"want to push "<<word[i]<<endl;
 		basic.push_back(word[i]);
 	}
-	map<vector<string>,int> group;
+	map<vector<string>,int> group; // select列中的每一行数据完全一样时才会被记到一个key中 
 	Database* tmp_database=DB.current_db;
 	cout<<word[count_index+3]<<endl;
 //？？ 
@@ -131,17 +134,17 @@ void Group_by(string *word,int how_many_word, string order_by_attr) // order_by_
 	}
 	Table tmp_table=tmp_database->table_list[word[count_index+3]];//找到目前使用的table
 
-	for(auto i:tmp_table.row_map)
+	for(auto i:tmp_table.row_map) // 遍历当前 table 中的所有行 
 	{
 		cout<<"!"<<endl;
-		vector<string> tmp_row;
+		vector<string> tmp_row; // 每次抽出一个行，把所有数据 push 进 tmp_row 中 
 		bool ok=1; 
 		for(int j=0;j<basic.size();j++)
 		{
 			cout<<"want to back"<<i.second.data[basic[j]]<<endl;
-			if(basic[j]==count_col)//如果发现count的列
+			if(basic[j]==count_col) //如果发现count的列
 			{
-				if(i.second.data[basic[j]]=="NULL")ok=0;
+				if(i.second.data[basic[j]]=="NULL")ok=0; // 跳过空值 
 			} 
 			tmp_row.push_back(i.second.data[basic[j]]);
 		}
@@ -179,7 +182,7 @@ void Group_by(string *word,int how_many_word, string order_by_attr) // order_by_
 	    	{
 	    		cout<<i.first[index[j]]<<"\t";
 			}
-			cout<<i.second;//此处还没完善，其实应该判断count有无 
+			cout<<i.second; 
 			cout<<endl;
 		}
 	else if(order_by_attr != "COUNT") { // 如果有 orderby 且不是 order Count(*)这一列 
@@ -307,8 +310,9 @@ void NewSelect(string *word, int how_many_word, string wherestring, string order
 			return;
 		}
 		else {
-
-			std::set<Data> key_of_rows = where_clause(table_name, wherestring);
+			StringSplit(wherestring, rootnode, &DB.current_db->table_list[table_name]);
+			//std::set<Data> key_of_rows = where_clause(table_name, wherestring);
+			std::set<Data> key_of_rows = getWhereKeys(rootnode, &DB.current_db->table_list[table_name]);
 			if(key_of_rows.begin() != key_of_rows.end())
 				DB.OutputAttr(table_name);
 			if(order_by_attr == "") 
@@ -388,7 +392,9 @@ void NewSelect(string *word, int how_many_word, string wherestring, string order
 				std::cout << (*i) << "\t";
 			}
 			std::cout << *(attr_name.end()-1) << "\n" ;
-			std::set<Data> key_of_rows = where_clause(table_name, wherestring);
+			StringSplit(wherestring, rootnode, &DB.current_db->table_list[table_name]);
+			//std::set<Data> key_of_rows = where_clause(table_name, wherestring);
+			std::set<Data> key_of_rows = getWhereKeys(rootnode, &DB.current_db->table_list[table_name]);
 			
 			if(order_by_attr == "") {
 				for (auto i = key_of_rows.begin(); i != key_of_rows.end(); i++) {
