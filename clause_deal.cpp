@@ -11,14 +11,7 @@
 extern DatabaseMap DB;
 using namespace std;
 //void Select(std::stringstream& ss,bool foutput=false);
-void Group_by(string*,int, string s = "");
-int Find(string*,string,int);
-void NewSelect(string*, int, string, string order_by_attr = "");
-string GetOrderbyType(string table_name, string order_by_attr);
 Wherenode *rootnode = nullptr;
-void Output(string* word,string command);
-void Input(string* word,int how_many_word);
-void Union(string* word,int how_many_word);
 
 void clause_deal(char* cmd,string command)
 {
@@ -521,7 +514,7 @@ void Union(string* word,int how_many_word){
 	string* p=word;
 	int pos=Find(word,"FROM",how_many_word);//如果用UNION的话，最后一个UNION后面的那张表的信息不好弄
 	tableName=p[pos+1];
-	cout<<tableName<<endl;
+	//cout<<tableName<<endl;
 	u_table=DB.current_db->table_list[tableName];//因为要重新输出里面的元素所以拷贝构造一个新的没有关系
 	if(!multi){
 		pickitem(selected,u_table,attrName);
@@ -530,13 +523,13 @@ void Union(string* word,int how_many_word){
 		multipickitem(multiselected,u_table,attrName);
 	}
 	p=p+pos+2;
-	cout<<"pos: "<<pos<<endl;
+	//cout<<"pos: "<<pos<<endl;
 	pos=Find(p,"FROM",how_many_word-pos-2);
-	cout<<"pos: "<<pos<<endl;
+	//cout<<"pos: "<<pos<<endl;
 	while(pos!=-1){
 		tableName=p[pos+1];//pos是对p的相对位置呀 
 		u_table=DB.current_db->table_list[tableName];
-		cout<<tableName<<endl;
+		//cout<<tableName<<endl;
 		if(!multi){
 			pickitem(selected,u_table,attrName);
 		}
