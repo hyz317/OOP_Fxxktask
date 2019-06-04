@@ -6,6 +6,7 @@
 #include <cstring>
 #include <fstream>
 #include <sstream>
+#include <set>
 #include "Wherenode.h"
 extern DatabaseMap DB;
 using namespace std;
@@ -17,6 +18,7 @@ string GetOrderbyType(string table_name, string order_by_attr);
 Wherenode *rootnode = nullptr;
 void Output(string* word,string command);
 void Input(string* word,int how_many_word);
+void Union(string* word,int how_many_word);
 
 void clause_deal(char* cmd,string command)
 {
@@ -73,6 +75,9 @@ void clause_deal(char* cmd,string command)
 		Find(word,"GROUP",how_many_word)==-1&&Find(word,"ORDER",how_many_word)!=-1) NewSelect(word,how_many_word,WhereString,word[Find(word,"ORDER",how_many_word)+2]); 
 //		printTempDatabaseOverall(tmp_database); // 全局输出调试语句 
 	
+		if(Find(word,"UNION",how_many_word)!=-1){
+			Union(word,how_many_word);
+		}
 }
 
 bool OrderByCompare2(const string &a1, const string &a2, string type) // 一个判断两个 value 大小的函数 
@@ -493,3 +498,62 @@ void NewSelect(string *word, int how_many_word, string wherestring, string order
 	}
 }
 
+void pickitem(set<string>& selected,Table table,string attrName){
+	for(auto i=table.row_map.begin();i!=table.row_map.end();i++){
+		selected.insert(i->second.data[attrName]);
+	}
+}
+void multipickitem(multiset<string>& multiselected,Table table,string attrName){
+	for(auto i=table.row_map.begin();i!=table.row_map.end();i++){
+		multiselected.insert(i->second.data[attrName]);
+	}
+}
+void Union(string* word,int how_many_word){
+	bool multi=false;//是否为"UNIONALL" 
+	set<string> selected;
+	multiset<string> multiselected;
+	if(Find(word,"ALL",how_many_word)!=-1){
+		multi=true;
+	}
+	string attrName=word[1];
+	string tableName;
+	Table u_table;
+	string* p=word;
+	int pos=Find(word,"FROM",how_many_word);//如果用UNION的话，最后一个UNION后面的那张表的信息不好弄
+	tableName=p[pos+1];
+	cout<<tableName<<endl;
+	u_table=DB.current_db->table_list[tableName];//因为要重新输出里面的元素所以拷贝构造一个新的没有关系
+	if(!multi){
+		pickitem(selected,u_table,attrName);
+	}
+	else{
+		multipickitem(multiselected,u_table,attrName);
+	}
+	p=p+pos+2;
+	cout<<"pos: "<<pos<<endl;
+	pos=Find(p,"FROM",how_many_word-pos-2);
+	cout<<"pos: "<<pos<<endl;
+	while(pos!=-1){
+		tableName=p[pos+1];//pos是对p的相对位置呀 
+		u_table=DB.current_db->table_list[tableName];
+		cout<<tableName<<endl;
+		if(!multi){
+			pickitem(selected,u_table,attrName);
+		}
+		else{
+			multipickitem(multiselected,u_table,attrName);
+		}
+		p=p+pos+2;
+		pos=Find(p,"FROM",how_many_word-pos-2); 
+	}
+	if(!multi){
+		for(auto i:selected){//我觉得这个也属于“可能无主键输出不确定所以一定会有ORDER BY”的范围吧..?不能的话就用map映射值和顺序 
+			cout<<i<<endl;
+		}
+	}
+	else{
+		for(auto i:multiselected){
+			cout<<i<<endl;
+		}
+	}
+}
