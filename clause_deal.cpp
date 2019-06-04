@@ -15,6 +15,9 @@ int Find(string*,string,int);
 void NewSelect(string*, int, string, string order_by_attr = "");
 string GetOrderbyType(string table_name, string order_by_attr);
 Wherenode *rootnode = nullptr;
+void Output(string* word,string command);
+void Input(string* word,int how_many_word);
+
 void clause_deal(char* cmd,string command)
 {
 	cout<<"deal"<<endl;
@@ -45,31 +48,16 @@ void clause_deal(char* cmd,string command)
 	//	deal_database(word,tmp_database,database);//Èç¹û°ÑNULL´«½øÈ¥£¬Ö»ÓĞÍ¨¹ı·µ»ØÖ¸Õë²Å¿ÉÒÔµÃµ½ĞÂÖ¸Õë 
 	//	deal_datalist(word,tmp_database,how_many_word);
 	//	deal_data(word,tmp_database,how_many_word,WhereString,rootnode);
-		if(word[3]=="OUTFILE") {
-			string OutFileName=word[4];
-			fstream check;
-			check.open(OutFileName,ios::in);
-			if(check){
-				cout<<"ÎÄ¼şÒÑ´æÔÚ£¡»»Ò»¸öÃû×Ö°É£¡"<<endl;
-			}
-			else{
-				check.close();
-				cout<<"Êä³ö"<<endl;
-				fstream fout;
-				fout.open(OutFileName,ios::out);
-				streambuf* ocb=cout.rdbuf();//origin cout buffer
-				streambuf* fb=fout.rdbuf();//fout buffer
-				cout.rdbuf(fb);
-				bool foutput=true;
-				stringstream ss(command);
-				Select(ss,foutput);
-				fout.flush();
-				fout.close();
-				cout.rdbuf(ocb);
-			}
+	
+		//µ¼Èëµ¼³ö 
+		if(Find(word,"OUTFILE",how_many_word)!=-1) {//²»ÖªµÀSELECTºóÃæµÄ*ÊÇ²»ÊÇÖ»ÓĞÒ»¸ö´Ê 
+			Output(word,command);
+		}
+		if(word[0]=="LOAD"){//µ½Ê±ºò¿´ÏÂ»¹Ğè²»ĞèÒª½øÒ»²½ÌØÅĞ 
+			Input(word,how_many_word);
 		}
 		
-		MathFunction mathfuntion(word,how_many_word);
+		MathFunction mathfuntion(word,how_many_word);//¹¤³§Ä£Ê½ 
 		if(mathfuntion.Deal())return;
 		
 		//wtrµÄµÚÒ»¸öÌØÅĞ£¬select + count + groupby 
@@ -109,6 +97,71 @@ int Find(string *word,string keyword,int how_many_word) // ´Ó string Êı×éÖĞÕÒÕıÈ
 	}
 	return -1;
 }
+
+void Output(string* word,string command){
+	string OutFileName=word[4];//µ¥ÒıºÅÒÑ±»É¾³ı
+	fstream check;		
+	check.open(OutFileName,ios::in);
+	if(check){
+		cout<<"ÎÄ¼şÒÑ´æÔÚ£¡»»Ò»¸öÃû×Ö°É£¡"<<endl;
+	}
+	else{
+		check.close();
+		cout<<"Êä³ö"<<endl;
+		fstream fout;
+		fout.open(OutFileName,ios::out);
+		streambuf* ocb=cout.rdbuf();//origin cout buffer
+		streambuf* fb=fout.rdbuf();//fout buffer
+		cout.rdbuf(fb);
+		bool foutput=true;
+		stringstream ss(command);
+		Select(ss,foutput);
+		fout.flush();
+		fout.close();
+		cout.rdbuf(ocb);
+	}
+}
+
+void Input(string* word,int how_many_word){
+	string InFileName=word[3];
+	fstream check;
+	check.open(InFileName,ios::in);
+	if(!check){
+		cout<<"ÎÄ¼ş²»´æÔÚ£¡"<<endl; 
+	}
+	else{
+		int pos=Find(word,"TABLE",how_many_word);
+		string tableName=word[pos+1];
+		cout<<"table: "<<tableName<<endl;
+		vector<string> attrs;
+		for(int i=pos+2;i<how_many_word;i++){
+			attrs.push_back(word[i]);
+		}
+		Table& current_table=DB.current_db->table_list[tableName];//±ØĞëµÃÒıÓÃ£¬ÒòÎª¿½±´¸´ÖÆ³öÀ´µÄ¾Í²»ÊÇÔ­À´ÄÇ¸ö±íÁË£¡²»ÔÚdata_listÀï£¬¶øÇÒ¼´Ê¹ĞÂ¼Ó½øÈ¥ÁËÒ²ÊÇÁ½¸ö±í 
+		//cout<<"key: "<<current_table.getkey()<<endl;
+		bool ok=true;
+		while(!check.eof()){
+			string temp;
+			getline(check,temp);//¶ÁÈ¡Ã¿Ò»ĞĞ 
+			stringstream input(temp);
+			string buffer;
+			vector<string> values;
+			for(int i=0;i<attrs.size();i++){
+				input>>buffer;
+				if(buffer.size()==0){//ÒòÎª×îºó»á¶ÁÈëÒ»¸ö¿ÕµÄ£¬ÕâÊ±Èç¹û»¹°ÑËüinsert¾Í»á³öÎÊÌâ£¬ËùÒÔĞèÒªÌØÅĞÒ»ÏÂ 
+					ok=false;
+					break;
+				}
+				values.push_back(buffer);
+			}
+			if(ok){
+				current_table.insert(attrs,values);//ÀûÓÃµÚÒ»½×¶ÎµÄinsertº¯Êı 
+			}
+		}
+		check.close();
+	}
+}
+
 //SELECT stu_name, COUNT(*) from oop_info GROUP BY stu_name
 //select ÊÇÑ¡ÔñÊä³ö
 //count ÊÇÑ¡Ôñ¼ÆÊı

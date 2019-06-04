@@ -207,7 +207,7 @@ bool JudgeWhere(Wherenode* node, Row* myrow)
 	}
 }
 
-std::set<Data> getWhereKeys(Wherenode *rootnode, Table *mytable)
+std::set<Data> getWhereKeys(Wherenode *rootnode, Table *mytable)//ÊÊÅäÆ÷Ä£Ê½ 
 {
 	std::set<Data> Dataset;
 	for(auto i: mytable->row_map) {
