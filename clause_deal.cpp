@@ -68,6 +68,10 @@ void clause_deal(char* cmd,string command)
 				cout.rdbuf(ocb);
 			}
 		}
+		
+		MathFunction mathfuntion(word,how_many_word);
+		if(mathfuntion.Deal())return;
+		
 		//wtr的第一个特判，select + count + groupby 
 		if(Find(word,"SELECT",how_many_word)!=-1&&Find(word,"COUNT",how_many_word)!=-1&&
 		Find(word,"GROUP",how_many_word)!=-1&&Find(word,"ORDER",how_many_word)==-1)Group_by(word,how_many_word); 

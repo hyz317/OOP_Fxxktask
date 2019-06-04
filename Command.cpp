@@ -37,6 +37,9 @@ void Command::operate() {
 		Delete(ss);
 	}
 	else if ((cmd_type == "SELECT" || cmd_type == "select")&&command.find("OUTFILE")==-1&&command.find("GROUP")==-1&&command.find("ORDER")==-1) {	
+		if(command.find("LEFT")||command.find("LCASE")||command.find("UCASE")||command.find("SPACE")||command.find("LOCATE")
+		||command.find("STRCMP"))
+		return ;
 		Select(ss);
 	}
 	else {
