@@ -34,6 +34,11 @@ H socket wtr
 拓展功能1 AST hyz
 拓展功能2 算数运算符原位修改数据
 
+ppt 可以考虑放演示视频
+wtr socket&QT（hyz云端服务器能挣出来最好）
+hyz AST
+byz 数据库结构和B树
+
 =====时间表=====
 
 hyz: Mon 15:05-22:00 Tue 15:05-22:00 Wed Pigeon Thu 全天 Fri 9:50-18:00 Sat Sun

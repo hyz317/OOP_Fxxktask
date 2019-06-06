@@ -498,7 +498,8 @@ void pickitem(set<vector<string>>& selected,Table table,vector<string> attrName,
 		for(auto i=table.row_map.begin();i!=table.row_map.end();i++){
 			temp.clear();
 			for(auto j:attrName){
-				temp.push_back(i->second.data[j]);
+				cout<<"temp_pushback "<<i->second.data[j]<<" now temp size:["<<temp.size()<<"] attrname:"<<j<<endl;
+				/*if(i->second.data[j] != "")*/ temp.push_back(i->second.data[j]);
 			}
 			selected.insert(temp);
 		}
@@ -578,6 +579,7 @@ void Union(string* word,int how_many_word,string scmd){
 	cout<<orderbyattrName<<endl;
 	for(int i=Find(p,"SELECT",how_many_word)+1;i<pos;i++){
 		attrName.push_back(word[i]);
+		cout<<"attrname.push_back "<<word[i]<<endl;
 		if(word[i]==orderbyattrName){
 			orderbynum=i-Find(p,"SELECT",how_many_word)-1;
 		}
@@ -605,6 +607,7 @@ void Union(string* word,int how_many_word,string scmd){
 	while(pos!=-1){
 		for(int i=Find(p,"SELECT",how_many_word)+1;i<pos;i++){
 			attrName.push_back(word[i]);
+			cout<<"第2次?? attr.name_push_back "<<word[i]<<endl;
 		}
 		tableName=p[pos+1];//pos是对p的相对位置呀 
 		u_table=DB.current_db->table_list[tableName];
@@ -625,11 +628,12 @@ void Union(string* word,int how_many_word,string scmd){
 		wherestr="NULL";
 	}
 	if(!multi){
-		cout<<"selected"<<endl;
+		cout<<"selected"<<' '<<selected.size()<<endl;
 		vector<string> tmp=*selected.begin();//检测重复元素（你妈的为什么） 
 		for(auto i:selected){
+			cout<<"size ["<<i.size()<<"] ";
 			for(auto j:i){
-				cout<<j<<" ";
+				cout<<j<<"*";
 			}
 			cout<<endl;
 			cout<<(i==tmp)<<endl;
