@@ -69,7 +69,7 @@ void clause_deal(char* cmd,string command)
 //		printTempDatabaseOverall(tmp_database); // 全局输出调试语句 
 	
 		if(Find(word,"UNION",how_many_word)!=-1){
-			Union(word,how_many_word);
+			Union(word,how_many_word,scmd);
 		}
 }
 
@@ -491,62 +491,179 @@ void NewSelect(string *word, int how_many_word, string wherestring, string order
 	}
 }
 
-void pickitem(set<string>& selected,Table table,string attrName){
-	for(auto i=table.row_map.begin();i!=table.row_map.end();i++){
-		selected.insert(i->second.data[attrName]);
+void pickitem(set<vector<string>>& selected,Table table,vector<string> attrName,string wherestring,int orderbynum){
+	int count=0;
+	vector<string> temp;
+	if(wherestring=="NULL"){
+		for(auto i=table.row_map.begin();i!=table.row_map.end();i++){
+			temp.clear();
+			for(auto j:attrName){
+				temp.push_back(i->second.data[j]);
+			}
+			selected.insert(temp);
+		}
+	}
+	else{
+		StringSplit(wherestring, rootnode, &table);
+		set<Data> key_of_rows=getWhereKeys(rootnode,&table);
+		for(auto i:key_of_rows){
+			temp.clear();
+			for(auto j:attrName){
+				temp.push_back(table.row_map[i].data[j]);
+			}
+			selected.insert(temp);
+		}
 	}
 }
-void multipickitem(multiset<string>& multiselected,Table table,string attrName){
-	for(auto i=table.row_map.begin();i!=table.row_map.end();i++){
-		multiselected.insert(i->second.data[attrName]);
+void multipickitem(multiset<vector<string>>& multiselected,Table table,vector<string> attrName,string wherestring,int orderbynum){
+	int count=0;
+	vector<string> temp;
+	if(wherestring=="NULL"){
+		for(auto i=table.row_map.begin();i!=table.row_map.end();i++){
+			temp.clear();
+			for(auto j:attrName){
+				temp.push_back(i->second.data[j]);
+			}
+			multiselected.insert(temp);
+		}
+	}
+	else{
+		StringSplit(wherestring, rootnode, &table);
+		set<Data> key_of_rows=getWhereKeys(rootnode,&table);
+		for(auto i:key_of_rows){
+			temp.clear();
+			for(auto j:attrName){
+				temp.push_back(table.row_map[i].data[j]);
+			}
+			multiselected.insert(temp);
+		}
 	}
 }
-void Union(string* word,int how_many_word){
-	bool multi=false;//是否为"UNIONALL" 
-	set<string> selected;
-	multiset<string> multiselected;
+bool UnionCompare(vector<string> v1,vector<string>v2,string orderbytype,int orderbynum){
+	if(orderbytype=="int"){
+		return stoi(v1[orderbynum])<stoi(v2[orderbynum]);
+	}
+	else if(orderbytype=="double"){
+		return stod(v1[orderbynum])<stod(v2[orderbynum]);
+	}
+	else if(orderbytype=="char"){
+		return v1[orderbynum]<v2[orderbynum];
+	}
+	else{
+		cout<<"Hey what are you doing???"<<endl;
+	}
+}
+void Union(string* word,int how_many_word,string scmd){
+	bool multi=false;//判断是否为"UNION ALL" 
+	set<vector<string>> selected;
+	multiset<vector<string>> multiselected;
 	if(Find(word,"ALL",how_many_word)!=-1){
 		multi=true;
 	}
-	string attrName=word[1];
+	string orderbyattrName;//用来排序的是哪一个（根据网上的说法名字按第一个表的表头名称走）
+	int orderbynum;//是整个序列里的第几个（因为可能不同表格的表头名字不一样） 
+	string orderbytype;//是什么类型 
+	
+	string* p;//指向某一个word的指针，每次从上次没查到的地方开始 
+	vector<string> attrName;//可能有多个变量要找 
 	string tableName;
 	Table u_table;
-	string* p=word;
-	int pos=Find(word,"FROM",how_many_word);//如果用UNION的话，最后一个UNION后面的那张表的信息不好弄
+	int pos;//"FROM"的位置
+	int wherepos;
+	string wherestr="NULL";//之后每次都要初始化
+	
+	p=word;
+	pos=Find(p,"FROM",how_many_word);//如果用UNION的话，最后一个UNION后面的那张表的信息不好弄
+	orderbyattrName=word[Find(p,"ORDER",how_many_word)+2];
+	cout<<orderbyattrName<<endl;
+	for(int i=Find(p,"SELECT",how_many_word)+1;i<pos;i++){
+		attrName.push_back(word[i]);
+		if(word[i]==orderbyattrName){
+			orderbynum=i-Find(p,"SELECT",how_many_word)-1;
+		}
+	}
 	tableName=p[pos+1];
-	//cout<<tableName<<endl;
+	cout<<tableName<<endl;
+	orderbytype=GetOrderbyType(tableName,orderbyattrName);
+	cout<<orderbytype<<endl;
 	u_table=DB.current_db->table_list[tableName];//因为要重新输出里面的元素所以拷贝构造一个新的没有关系
+	if(word[pos+2]=="WHERE"){
+		scmd=scmd.substr(scmd.find("WHERE")+6);
+		wherestr=scmd.substr(0,scmd.find("UNION")-1);//第二个参数是长度，不过是从0开始所以无所谓 
+	}
+	
 	if(!multi){
-		pickitem(selected,u_table,attrName);
+		pickitem(selected,u_table,attrName,wherestr,orderbynum);
 	}
 	else{
-		multipickitem(multiselected,u_table,attrName);
+		multipickitem(multiselected,u_table,attrName,wherestr,orderbynum);
 	}
 	p=p+pos+2;
-	//cout<<"pos: "<<pos<<endl;
-	pos=Find(p,"FROM",how_many_word-pos-2);
-	//cout<<"pos: "<<pos<<endl;
+	how_many_word-=(pos+2);
+	pos=Find(p,"FROM",how_many_word);
+	wherestr="NULL";
 	while(pos!=-1){
+		for(int i=Find(p,"SELECT",how_many_word)+1;i<pos;i++){
+			attrName.push_back(word[i]);
+		}
 		tableName=p[pos+1];//pos是对p的相对位置呀 
 		u_table=DB.current_db->table_list[tableName];
+		if(word[pos+2]=="WHERE"){
+			scmd=scmd.substr(scmd.find("WHERE")+6);
+			wherestr=scmd.substr(0,scmd.find("UNION")-1);//第二个参数是长度，不过是从0开始所以无所谓 
+		}
 		//cout<<tableName<<endl;
 		if(!multi){
-			pickitem(selected,u_table,attrName);
+			pickitem(selected,u_table,attrName,wherestr,orderbynum);
 		}
 		else{
-			multipickitem(multiselected,u_table,attrName);
+			multipickitem(multiselected,u_table,attrName,wherestr,orderbynum);
 		}
 		p=p+pos+2;
-		pos=Find(p,"FROM",how_many_word-pos-2); 
+		how_many_word-=(pos+2);
+		pos=Find(p,"FROM",how_many_word); 
+		wherestr="NULL";
 	}
 	if(!multi){
-		for(auto i:selected){//我觉得这个也属于“可能无主键输出不确定所以一定会有ORDER BY”的范围吧..?不能的话就用map映射值和顺序 
-			cout<<i<<endl;
+		cout<<"selected"<<endl;
+		vector<string> tmp=*selected.begin();//检测重复元素（你妈的为什么） 
+		for(auto i:selected){
+			for(auto j:i){
+				cout<<j<<" ";
+			}
+			cout<<endl;
+			cout<<(i==tmp)<<endl;
+			tmp=i;
+		}
+		cout<<"selected"<<endl;
+		int count=0;
+		vector<string> minimum=*selected.begin();
+		while(!selected.empty()){
+			for(auto i:selected){
+				if(UnionCompare(i,minimum,orderbytype,orderbynum)){
+					minimum=i;
+				}
+			}
+			for(auto i:minimum){
+				cout<<i<<'\t';
+			}
+			cout<<endl;
+			selected.erase(minimum);//记得清除！
 		}
 	}
 	else{
-		for(auto i:multiselected){
-			cout<<i<<endl;
+		vector<string> minimum=*multiselected.begin();
+		while(!multiselected.empty()){
+			for(auto i:selected){
+				if(UnionCompare(i,minimum,orderbytype,orderbynum)){
+					minimum=i;
+				}
+			}
+			for(auto i:minimum){
+				cout<<i<<'\t';
+			}
+			cout<<endl;
+			multiselected.erase(minimum);//记得清除！
 		}
 	}
 }

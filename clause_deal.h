@@ -9,4 +9,4 @@ void NewSelect(string*, int, string, string order_by_attr = "");
 string GetOrderbyType(string table_name, string order_by_attr);
 void Output(string* word,string command);
 void Input(string* word,int how_many_word);
-void Union(string* word,int how_many_word);
+void Union(string* word,int how_many_word,string scmd);
