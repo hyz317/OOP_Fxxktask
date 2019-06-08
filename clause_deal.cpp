@@ -54,7 +54,6 @@ void clause_deal(char* cmd,string command)
 		
 		MathFunction mathfuntion(word,how_many_word);//¹¤³§Ä£Ê½ 
 		if(mathfuntion.Deal())return;
-		
 		//wtrµÄµÚÒ»¸öÌØÅÐ£¬select + count + groupby 
 		if(Find(word,"SELECT",how_many_word)!=-1&&Find(word,"COUNT",how_many_word)!=-1&&
 		Find(word,"GROUP",how_many_word)!=-1&&Find(word,"ORDER",how_many_word)==-1)Group_by(word,how_many_word); 
@@ -84,6 +83,10 @@ bool OrderByCompare2(const string &a1, const string &a2, string type) // Ò»¸öÅÐ¶
 	if(type == "double")
 		return stod(a1) < stod(a2);
 	if(type == "char")
+		return a1 < a2; 
+	if(type == "date")
+		return a1 < a2;
+	if(type == "time")
 		return a1 < a2; 
 } 
 
@@ -322,7 +325,7 @@ bool OrderByCompare(string table_name, string order_by_attr, const Data& a1, con
 		return stoi(DB.current_db->table_list[table_name].row_map[a1].data[order_by_attr]) < stoi(DB.current_db->table_list[table_name].row_map[a2].data[order_by_attr]);
 	else if(type == "double")
 		return stod(DB.current_db->table_list[table_name].row_map[a1].data[order_by_attr]) < stod(DB.current_db->table_list[table_name].row_map[a2].data[order_by_attr]);
-	else if(type == "char")
+	else if(type == "char" || type == "date" || type == "time")
 		return DB.current_db->table_list[table_name].row_map[a1].data[order_by_attr] < DB.current_db->table_list[table_name].row_map[a2].data[order_by_attr];
 }
 
@@ -547,7 +550,7 @@ bool UnionCompare(vector<string> v1,vector<string>v2,string orderbytype,int orde
 	else if(orderbytype=="double"){
 		return stod(v1[orderbynum])<stod(v2[orderbynum]);
 	}
-	else if(orderbytype=="char"){
+	else if(orderbytype=="char" || orderbytype=="date" || orderbytype=="time"){
 		return v1[orderbynum]<v2[orderbynum];
 	}
 	else{

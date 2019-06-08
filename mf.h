@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <iostream>
+#include <ctime>
 
 using namespace std;
 
@@ -22,4 +23,10 @@ class MathFunction{
 	void Space();
 	void Left();
 	void Strcmp(); 
+	void AddDate();
+	void AddTime();
 };
+
+int Finds(string *word,string keyword,int how_many_word);
+void tolower(string& x);
+void toupper(string& x);

@@ -146,7 +146,7 @@ bool compareless(const string &a1, const string &a2, string type)
 		return stoi(a1) < stoi(a2);
 	else if(type == "double")
 		return stod(a1) < stod(a2);
-	else if(type == "char")
+	else if(type == "char" || type == "date" || type == "time")
 		return a1 < a2;
 	else
 		throw("you compare you horse huh"); 
@@ -158,7 +158,7 @@ bool comparemore(const string &a1, const string &a2, string type)
 		return stoi(a1) > stoi(a2);
 	else if(type == "double")
 		return stod(a1) > stod(a2);
-	else if(type == "char")
+	else if(type == "char" || type == "date" || type == "time")
 		return a1 < a2;
 	else
 		throw("you compare you horse huh"); 
@@ -170,7 +170,7 @@ bool compareequal(const string &a1, const string &a2, string type)
 		return stoi(a1) == stoi(a2);
 	else if(type == "double")
 		return stod(a1) == stod(a2);
-	else if(type == "char")
+	else if(type == "char" || type == "date" || type == "time")
 		return a1 == a2;
 	else
 		throw("you compare you horse huh"); 

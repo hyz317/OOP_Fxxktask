@@ -32,6 +32,10 @@ void Database::ShowColumns(std::string tablename) {
 			std::cout << "char(1)" << "\t";
 		else if (it->type == "double")
 			std::cout << "double" << "\t";
+		else if (it->type == "time")
+			std::cout << "time" << "\t";
+		else if (it->type == "date")
+			std::cout << "date" << "\t";
 		//std::cout << it.type << "\t";
 		if (it->Null == true)
 			std::cout << "YES" << "\t";

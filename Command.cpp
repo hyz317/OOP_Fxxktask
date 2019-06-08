@@ -37,8 +37,8 @@ void Command::operate() {
 		Delete(ss);
 	}
 	else if ((cmd_type == "SELECT" || cmd_type == "select")&&command.find("OUTFILE")==-1&&command.find("GROUP")==-1&&command.find("ORDER")==-1) {	
-		if(command.find("LEFT")||command.find("LCASE")||command.find("UCASE")||command.find("SPACE")||command.find("LOCATE")
-		||command.find("STRCMP"))
+		if(command.find("LEFT")!=-1||command.find("LCASE")!=-1||command.find("UCASE")!=-1||command.find("SPACE")!=-1||command.find("LOCATE")!=-1
+		||command.find("STRCMP")!=-1)
 		return ;
 		Select(ss);
 	}
@@ -107,6 +107,12 @@ void Create(std::stringstream& ss) {
 				else if (tmp3 == "DOUBLE" || tmp3 == "double") {
 					tmp.type = "double";
 				}
+				else if (tmp3 == "DATE" || tmp3 == "date") {
+					tmp.type = "date";
+				}
+				else if (tmp3 == "TIME" || tmp3 == "time") {
+					tmp.type = "time";
+				}
 				else {
 					std::cout << "ERROR!\n";
 					return;
@@ -124,6 +130,12 @@ void Create(std::stringstream& ss) {
 				else if (tmp3 == "DOUBLE" || tmp3 == "double") {
 					tmp.type = "double";
 				}
+				else if (tmp3 == "DATE" || tmp3 == "date") {
+					tmp.type = "date";
+				}
+				else if (tmp3 == "TIME" || tmp3 == "time") {
+					tmp.type = "time";
+				}
 				else {
 					std::cout << "ERROR!\n";
 					return;
@@ -140,6 +152,12 @@ void Create(std::stringstream& ss) {
 				}
 				else if (tmp3 == "DOUBLE" || tmp3 == "double") {
 					tmp.type = "double";
+				}
+				else if (tmp3 == "DATE" || tmp3 == "date") {
+					tmp.type = "date";
+				}
+				else if (tmp3 == "TIME" || tmp3 == "time") {
+					tmp.type = "time";
 				}
 				else {
 					std::cout << "ERROR!\n";
@@ -361,6 +379,22 @@ void Insert(std::stringstream& ss) {
 			value_list.push_back(tmp);
 			break;
 		}
+		else if (tmp[0] == '"') {
+			tmp = tmp.substr(1);
+			string part2;
+			ss >> part2;
+			if(part2[part2.length() - 1] == ',') {
+				part2 = part2.substr(0, part2.length() - 2);
+				tmp = tmp + " " + part2;
+				value_list.push_back(tmp);
+			}
+			else if(part2[part2.length() - 1] == ')') {
+				part2 = part2.substr(0, part2.length() - 2);
+				tmp = tmp + " " + part2;
+				value_list.push_back(tmp);
+				break;
+			}
+		}
 		else {
 			std::cout << "ERROR!\n";
 			return;
@@ -400,9 +434,23 @@ void OutputData(std::string value, std::string type) {
 		std::cout << tmp;
 	}
 	else if (type == "char"||type == "CHAR") {
-		char tmp;
+		string tmp;
 		ss >> tmp;
 		std::cout << tmp;
+	}
+	else if (type == "date"||type == "DATE") {
+		string tmp;
+		ss >> tmp;
+		std::cout << tmp;
+	}
+	else if (type == "time"||type == "TIME") {
+		string tmp;
+		ss >> tmp;
+		std::cout << tmp;
+		if(tmp[0] != '0') {
+			ss >> tmp;
+			std::cout << ' ' << tmp;
+		}
 	}
 	else {
 		std::cout << "ERROR!\n";
