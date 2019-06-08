@@ -64,7 +64,7 @@ void clause_deal(char* cmd,string command)
 		
 		//新加的第三个特判，select + count + orderby 
 		if(Find(word,"SELECT",how_many_word)!=-1&&Find(word,"COUNT",how_many_word)==-1&&
-		Find(word,"GROUP",how_many_word)==-1&&Find(word,"ORDER",how_many_word)!=-1) NewSelect(word,how_many_word,WhereString,word[Find(word,"ORDER",how_many_word)+2]); 
+		Find(word,"GROUP",how_many_word)==-1&&Find(word,"ORDER",how_many_word)!=-1&&Find(word,"UNION",how_many_word)==-1) NewSelect(word,how_many_word,WhereString,word[Find(word,"ORDER",how_many_word)+2]); 
 //		printTempDatabaseOverall(tmp_database); // 全局输出调试语句 
 	
 		if(Find(word,"UNION",how_many_word)!=-1){
@@ -502,7 +502,7 @@ void pickitem(set<vector<string>>& selected,Table table,vector<string> attrName,
 			temp.clear();
 			for(auto j:attrName){
 				cout<<"temp_pushback "<<i->second.data[j]<<" now temp size:["<<temp.size()<<"] attrname:"<<j<<endl;
-				/*if(i->second.data[j] != "")*/ temp.push_back(i->second.data[j]);
+				temp.push_back(i->second.data[j]);
 			}
 			selected.insert(temp);
 		}
@@ -510,7 +510,9 @@ void pickitem(set<vector<string>>& selected,Table table,vector<string> attrName,
 	else{
 		StringSplit(wherestring, rootnode, &table);
 		set<Data> key_of_rows=getWhereKeys(rootnode,&table);
+		cout<<"key_of_rows"<<endl;
 		for(auto i:key_of_rows){
+			cout<<"i "<<i.value<<endl;
 			temp.clear();
 			for(auto j:attrName){
 				temp.push_back(table.row_map[i].data[j]);
@@ -526,6 +528,7 @@ void multipickitem(multiset<vector<string>>& multiselected,Table table,vector<st
 		for(auto i=table.row_map.begin();i!=table.row_map.end();i++){
 			temp.clear();
 			for(auto j:attrName){
+				cout<<"temp_pushback "<<i->second.data[j]<<" now temp size:["<<temp.size()<<"] attrname:"<<j<<endl;
 				temp.push_back(i->second.data[j]);
 			}
 			multiselected.insert(temp);
@@ -581,7 +584,7 @@ void Union(string* word,int how_many_word,string scmd){
 	orderbyattrName=word[Find(p,"ORDER",how_many_word)+2];
 	cout<<orderbyattrName<<endl;
 	for(int i=Find(p,"SELECT",how_many_word)+1;i<pos;i++){
-		attrName.push_back(word[i]);
+		attrName.push_back(p[i]);
 		cout<<"attrname.push_back "<<word[i]<<endl;
 		if(word[i]==orderbyattrName){
 			orderbynum=i-Find(p,"SELECT",how_many_word)-1;
@@ -594,7 +597,12 @@ void Union(string* word,int how_many_word,string scmd){
 	u_table=DB.current_db->table_list[tableName];//因为要重新输出里面的元素所以拷贝构造一个新的没有关系
 	if(word[pos+2]=="WHERE"){
 		scmd=scmd.substr(scmd.find("WHERE")+6);
-		wherestr=scmd.substr(0,scmd.find("UNION")-1);//第二个参数是长度，不过是从0开始所以无所谓 
+		int stop=scmd.find("UNION");
+		if(stop==-1){
+			stop=scmd.find("ORDER");
+		}
+		wherestr=scmd.substr(0,stop-1);//第二个参数是长度，不过是从0开始所以无所谓
+		cout<<"wherestr "<<wherestr<<endl; 
 	}
 	
 	if(!multi){
@@ -608,15 +616,21 @@ void Union(string* word,int how_many_word,string scmd){
 	pos=Find(p,"FROM",how_many_word);
 	wherestr="NULL";
 	while(pos!=-1){
+		attrName.clear();//可能表头的名称不一样，所以每次都要重新读 
 		for(int i=Find(p,"SELECT",how_many_word)+1;i<pos;i++){
-			attrName.push_back(word[i]);
-			cout<<"第2次?? attr.name_push_back "<<word[i]<<endl;
+			attrName.push_back(p[i]);//看的是p的第几个！所以得是p[i]而非word[i] 
+			cout<<"attr.name_push_back "<<p[i]<<endl;
 		}
 		tableName=p[pos+1];//pos是对p的相对位置呀 
 		u_table=DB.current_db->table_list[tableName];
-		if(word[pos+2]=="WHERE"){
+		if(p[pos+2]=="WHERE"){
 			scmd=scmd.substr(scmd.find("WHERE")+6);
-			wherestr=scmd.substr(0,scmd.find("UNION")-1);//第二个参数是长度，不过是从0开始所以无所谓 
+			int stop=scmd.find("UNION");
+			if(stop==-1){//如果有union的话一定会在order的前面 
+				stop=scmd.find("ORDER");
+			}
+			wherestr=scmd.substr(0,stop-1);//第二个参数是长度，不过是从0开始所以无所谓 
+			cout<<"wherestr "<<wherestr<<endl;
 		}
 		//cout<<tableName<<endl;
 		if(!multi){
@@ -631,8 +645,9 @@ void Union(string* word,int how_many_word,string scmd){
 		wherestr="NULL";
 	}
 	if(!multi){
+		/*
 		cout<<"selected"<<' '<<selected.size()<<endl;
-		vector<string> tmp=*selected.begin();//检测重复元素（你妈的为什么） 
+		vector<string> tmp=*selected.begin();//检测重复元素
 		for(auto i:selected){
 			cout<<"size ["<<i.size()<<"] ";
 			for(auto j:i){
@@ -643,7 +658,7 @@ void Union(string* word,int how_many_word,string scmd){
 			tmp=i;
 		}
 		cout<<"selected"<<endl;
-		int count=0;
+		*/
 		vector<string> minimum=*selected.begin();
 		while(!selected.empty()){
 			for(auto i:selected){
@@ -656,12 +671,17 @@ void Union(string* word,int how_many_word,string scmd){
 			}
 			cout<<endl;
 			selected.erase(minimum);//记得清除！
+			if(!selected.empty()){//如果是空的就会出错 
+				minimum=*selected.begin();//minimum也要改！不然还是清除前的最小值没办法换成新的值 
+			}
 		}
+		cout<<"success"<<endl;
+		return;//记得return呀 
 	}
 	else{
 		vector<string> minimum=*multiselected.begin();
 		while(!multiselected.empty()){
-			for(auto i:selected){
+			for(auto i:multiselected){
 				if(UnionCompare(i,minimum,orderbytype,orderbynum)){
 					minimum=i;
 				}
@@ -670,7 +690,11 @@ void Union(string* word,int how_many_word,string scmd){
 				cout<<i<<'\t';
 			}
 			cout<<endl;
-			multiselected.erase(minimum);//记得清除！
+			multiselected.erase(multiselected.find(minimum));//如果用multiselected.erase(一个值)那么同值的会全erase；而用迭代器则只会erase一个
+			if(!multiselected.empty()){//multi!!! 
+				minimum=*multiselected.begin();//minimum也要改！不然还是清除前的最小值没办法换成新的值 （记得把selected改成multiselected）
+			}
 		}
+		return;
 	}
 }

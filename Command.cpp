@@ -36,7 +36,7 @@ void Command::operate() {
 	else if (cmd_type == "DELETE" || cmd_type == "delete") {
 		Delete(ss);
 	}
-	else if ((cmd_type == "SELECT" || cmd_type == "select")&&command.find("OUTFILE")==-1&&command.find("GROUP")==-1&&command.find("ORDER")==-1) {	
+	else if ((cmd_type == "SELECT" || cmd_type == "select")&&command.find("OUTFILE")==-1&&command.find("GROUP")==-1&&command.find("ORDER")==-1&&command.find("UNION")==-1) {	
 		if(command.find("LEFT")!=-1||command.find("LCASE")!=-1||command.find("UCASE")!=-1||command.find("SPACE")!=-1||command.find("LOCATE")!=-1
 		||command.find("STRCMP")!=-1)
 		return ;
