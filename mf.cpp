@@ -48,8 +48,78 @@ bool MathFunction::Deal()
 	{
 	this->AddTime();return 1;
 	}
+	if(word[1].find('+') != -1)
+	{
+	this->plus();return 1;
+	}
+	if(word[1].find('-') != -1)
+	{
+	this->minus();return 1;
+	}
+	if(word[1].find('*') != -1 && word[1] != "*")
+	{
+	this->times();return 1;
+	}
+	if(word[1].find('/') != -1)
+	{
+	this->divide();return 1;
+	}
+	if(Finds(word,"DIV",how_many_word)!=-1)
+	{
+	this->DIV();return 1;
+	}
+	if(Finds(word,"MOD",how_many_word)!=-1)
+	{
+	this->mod();return 1;
+	}
 	return 0;
 }
+
+void MathFunction::plus()
+{
+	cout<<word[1]<<endl;
+	cout<<stod(word[1].substr(0, word[1].find('+'))) + stod(word[1].substr(word[1].find('+') + 1))<<endl;
+}
+
+void MathFunction::minus()
+{
+	cout<<word[1]<<endl;
+	cout<<stod(word[1].substr(0, word[1].find('-'))) + stod(word[1].substr(word[1].find('-') + 1))<<endl;
+}
+
+void MathFunction::times()
+{
+	cout<<word[1]<<endl;
+	cout<<stod(word[1].substr(0, word[1].find('*'))) * stod(word[1].substr(word[1].find('*') + 1))<<endl;
+}
+
+void MathFunction::divide()
+{
+	if(stod(word[1].substr(word[1].find('/')+1))) {
+		cout<<"NULL\n";
+	}
+	cout<<word[1]<<endl;
+	cout<<stod(word[1].substr(0, word[1].find('/'))) / stod(word[1].substr(word[1].find('/') + 1))<<endl;
+}
+
+void MathFunction::DIV()
+{
+	if(word[2] == "0") {
+		cout<<"NULL\n";
+	}
+	cout<<word[1]<<' '<<word[2]<<' '<<word[3]<<endl;
+	cout<<stod(word[1]) / stod(word[3])<<endl;
+}
+
+void MathFunction::mod()
+{
+	if(word[2] == "0") {
+		cout<<"NULL\n";
+	}
+	cout<<word[1]<<' '<<word[2]<<' '<<word[3]<<endl;
+	cout<<stoi(word[1]) % stoi(word[3])<<endl;
+}
+
 void tolower(string& x)
 {
 	for(int i=0;i<x.length();i++)

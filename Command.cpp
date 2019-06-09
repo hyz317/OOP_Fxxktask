@@ -39,8 +39,9 @@ void Command::operate() {
 	}
 	else if ((cmd_type == "SELECT" || cmd_type == "select")&&command.find("OUTFILE")==-1&&command.find("GROUP")==-1&&command.find("ORDER")==-1&&command.find("UNION")==-1&&command.find("JOIN")==-1) {	
 		if(command.find("LEFT")!=-1||command.find("LCASE")!=-1||command.find("UCASE")!=-1||command.find("SPACE")!=-1||command.find("LOCATE")!=-1
-		||command.find("STRCMP")!=-1)
+		||command.find("STRCMP")!=-1||command.find("DIV")!=-1||command.find("MOD")!=-1||ss.str().substr(ss.str().find(' ')+1).find(' ')==-1)
 		return ;
+		//cout<<ss.str()<<endl;
 		Select(ss);
 	}
 	else {

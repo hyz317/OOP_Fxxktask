@@ -25,6 +25,12 @@ class MathFunction{
 	void Strcmp(); 
 	void AddDate();
 	void AddTime();
+	void plus();
+	void minus();
+	void times();
+	void divide();
+	void DIV();
+	void mod();
 };
 
 int Finds(string *word,string keyword,int how_many_word);
