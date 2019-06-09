@@ -381,9 +381,15 @@ void NewSelect(string *word, int how_many_word, string wherestring, string order
 			return;
 		}
 		else {
-			StringSplit(wherestring, rootnode, &DB.current_db->table_list[table_name]);
-			//std::set<Data> key_of_rows = where_clause(table_name, wherestring);
-			std::set<Data> key_of_rows = getWhereKeys(rootnode, &DB.current_db->table_list[table_name]);
+			std::set<Data> key_of_rows;
+			if(wherestring.find("LIKE") == -1) {
+				StringSplit(wherestring, rootnode, &DB.current_db->table_list[table_name]);
+				//std::set<Data> key_of_rows = where_clause(table_name, wherestring);
+				key_of_rows = getWhereKeys(rootnode, &DB.current_db->table_list[table_name]);
+			} 
+			else
+				key_of_rows = getWhereLikeKeys(&DB.current_db->table_list[table_name], wherestring);
+				
 			if(key_of_rows.begin() != key_of_rows.end())
 				DB.OutputAttr(table_name);
 			if(order_by_attr == "") 
@@ -463,10 +469,15 @@ void NewSelect(string *word, int how_many_word, string wherestring, string order
 				std::cout << (*i) << "\t";
 			}
 			std::cout << *(attr_name.end()-1) << "\n" ;
-			StringSplit(wherestring, rootnode, &DB.current_db->table_list[table_name]);
-			//std::set<Data> key_of_rows = where_clause(table_name, wherestring);
-			std::set<Data> key_of_rows = getWhereKeys(rootnode, &DB.current_db->table_list[table_name]);
 			
+			std::set<Data> key_of_rows;
+			if(wherestring.find("LIKE") == -1) {
+				StringSplit(wherestring, rootnode, &DB.current_db->table_list[table_name]);
+				//std::set<Data> key_of_rows = where_clause(table_name, wherestring);
+				key_of_rows = getWhereKeys(rootnode, &DB.current_db->table_list[table_name]);
+			} 
+			else
+				key_of_rows = getWhereLikeKeys(&DB.current_db->table_list[table_name], wherestring);
 			if(order_by_attr == "") {
 				for (auto i = key_of_rows.begin(); i != key_of_rows.end(); i++) {
 					for (int j = 0; j < attr_name.size() - 1; j++) {

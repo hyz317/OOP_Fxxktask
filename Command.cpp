@@ -566,8 +566,14 @@ void Select(std::stringstream& ss,bool foutput) {
 			getline(ss, clause, ';');
 			trim(clause);
 			Wherenode *rootnode = new Wherenode; 
-			StringSplit(clause, rootnode, &DB.current_db->table_list[table_name]);
-			std::set<Data> key_of_rows = getWhereKeys(rootnode, &DB.current_db->table_list[table_name]);
+			std::set <Data> key_of_rows;
+			if(clause.find("LIKE") == -1) {
+				StringSplit(clause, rootnode, &DB.current_db->table_list[table_name]);
+				//std::set<Data> key_of_rows = where_clause(table_name, wherestring);
+				key_of_rows = getWhereKeys(rootnode, &DB.current_db->table_list[table_name]);
+			} 
+			else
+				key_of_rows = getWhereLikeKeys(&DB.current_db->table_list[table_name], clause);
 			for (auto i = key_of_rows.begin(); i != key_of_rows.end(); i++) {
 				for (int j = 0; j < attr_name.size() - 1; j++) {
 					std::string value = DB.GetValue(table_name, attr_name[j], (*i).value);
