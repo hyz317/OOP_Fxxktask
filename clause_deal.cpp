@@ -522,8 +522,14 @@ void pickitem(set<vector<string>>& selected,Table table,vector<string> attrName,
 		}
 	} 
 	else{
-		StringSplit(wherestring, rootnode, &table);
-		set<Data> key_of_rows=getWhereKeys(rootnode,&table);
+		set<Data> key_of_rows;
+		if(wherestring.find("LIKE") != -1) {
+			key_of_rows = getWhereLikeKeys(&table, wherestring); 
+		}
+		else {
+			StringSplit(wherestring, rootnode, &table);
+			key_of_rows=getWhereKeys(rootnode,&table);
+		}
 		cout<<"key_of_rows"<<endl;
 		for(auto i:key_of_rows){
 			cout<<"i "<<i.value<<endl;
@@ -549,8 +555,14 @@ void multipickitem(multiset<vector<string>>& multiselected,Table table,vector<st
 		}
 	}
 	else{
-		StringSplit(wherestring, rootnode, &table);
-		set<Data> key_of_rows=getWhereKeys(rootnode,&table);
+		set<Data> key_of_rows;
+		if(wherestring.find("LIKE") != -1) {
+			key_of_rows = getWhereLikeKeys(&table, wherestring); 
+		}
+		else {
+			StringSplit(wherestring, rootnode, &table);
+			key_of_rows=getWhereKeys(rootnode,&table);
+		}
 		for(auto i:key_of_rows){
 			temp.clear();
 			for(auto j:attrName){

@@ -216,3 +216,68 @@ std::set<Data> getWhereKeys(Wherenode *rootnode, Table *mytable)//ÊÊÅäÆ÷Ä£Ê½
 	}
 	return Dataset;
 }
+
+bool Like(string a, string b)
+{
+	cout<<"### "<<a<<' '<<b<<endl;
+	if(a == "" && b == "") return true;
+	if(a == "%") return true;
+	int p = 0;
+	int least = 0;
+	bool more = 0;
+	while(a[p] == '%' || a[p] == '_') {
+		if(a[p] == '%') {
+			more = 1;
+		}
+		if(a[p] == '_') {
+			least ++;
+		}
+		p++;
+	}
+	cout<<"more "<<more<<' '<<"least "<<least <<endl;
+	b = b.substr(least);
+	if(p != 0 && !more)
+		return Like(a.substr(p), b);
+	if(p != 0 && more) {
+		int p2 = p;
+		while(p2 < a.size() && a[p2] != '%' && a[p2] != '_')
+			p2++;
+		string sub = a.substr(p, p2-1);
+		cout<<"sub "<<sub<<endl;
+		bool value = 0;
+		while(b.find(sub) != -1) {
+			int pos = b.find(sub);
+			b = b.substr(pos + sub.length());
+			value = value || Like(a.substr(p2), b);
+		}
+		return value;
+	}
+	if(p == 0) {
+		while(p < a.size() && a[p] != '%' && a[p] != '_')
+			p++;
+		string sub = a.substr(0, p);
+		if(b.find(sub) == 0)
+			return Like(a.substr(p), b.substr(sub.size()));
+		else return false;
+	}
+	
+} 
+
+std::set<Data> getWhereLikeKeys(Table *mytable, string clause)
+{
+	
+	int firstblankpos = clause.find(' ');
+	int likepos = clause.find("LIKE");
+	string column = clause.substr(0, likepos-1);
+	string likestring = clause.substr(likepos+5);
+	likestring = likestring.substr(1, likestring.length() - 2); 
+	cout<<"COLUMN!!! "<<column<<' '<<likestring<<endl;
+	
+	std::set<Data> Dataset;
+	for(auto i: mytable->row_map) {
+		if(Like(likestring, i.second.data[column]))
+			Dataset.insert(i.first);
+		cout<<likestring<<' '<<i.second.data[column]<<endl;
+	}
+	return Dataset;
+}

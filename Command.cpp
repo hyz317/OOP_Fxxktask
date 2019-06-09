@@ -6,6 +6,7 @@
 #include <iterator>
 #include "Command.h"
 #include "DatabaseMap.h"
+#include "Wherenode.h" 
 using std::string;
 using namespace std;
 void Command::operate() {
@@ -509,7 +510,11 @@ void Select(std::stringstream& ss,bool foutput) {
 			std::string clause;
 			getline(ss, clause, ';');
 			trim(clause);
-			std::set<Data> key_of_rows = where_clause(table_name, clause);
+			std::set<Data> key_of_rows;
+			if(clause.find("LIKE") == -1)
+				key_of_rows = where_clause(table_name, clause);
+			else
+				key_of_rows = getWhereLikeKeys(&(DB.current_db->table_list[table_name]), clause);
 			if(!foutput){
 				DB.OutputAttr(table_name);
 			}

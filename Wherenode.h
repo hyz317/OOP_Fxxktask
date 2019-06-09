@@ -20,6 +20,8 @@ bool JudgeWhere(Wherenode*, Row*); // 用于递归处理整个树
 void BuildWhereTree(Wherenode*, std::string[], int, int, Table*); // 用于从已经分割好的字符串建树 
 void StringSplit(std::string, Wherenode*, Table*); // 用于分割字符串 
 std::set<Data> getWhereKeys(Wherenode*, Table*);
+std::set<Data> getWhereLikeKeys(Table*, std::string);
+bool like(std::string, std::string);
 bool compareless(const std::string&, const std::string&, std::string type);
 bool comparemore(const std::string&, const std::string&, std::string type);
 bool compareequal(const std::string&, const std::string&, std::string type);
