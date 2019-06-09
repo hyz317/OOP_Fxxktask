@@ -15,7 +15,7 @@ Wherenode *rootnode = nullptr;
 
 void clause_deal(char* cmd,string command)
 {
-	cout<<"deal"<<endl;
+//	cout<<"deal"<<endl;
 //	char cmd[1020];
 //	if(!cin.getline(cmd,1000,';'))break;//若指令终止，说明一条语句结束，则break
 		string scmd=cmd;//做备份（之后要用strtok）

@@ -20,10 +20,4 @@ INSERT INTO access_log(aid, site_id, count, date) VALUES (8, 5, 545, "2016-05-16
 INSERT INTO access_log(aid, site_id, count, date) VALUES (9, 3, 201, "2016-05-17");
 
 SELECT * FROM Websites;
-SELECT * FROM access_log;
-
-SELECT Websites.name, access_log.count, access_log.date FROM Websites INNER JOIN access_log ON Websites.id=access_log.site_id ORDER BY access_log.count;
-SELECT Websites.name, access_log.count, access_log.date FROM Websites LEFT JOIN access_log ON Websites.id=access_log.site_id ORDER BY access_log.count;
-SELECT Websites.name, access_log.count, access_log.date FROM Websites RIGHT JOIN access_log ON Websites.id=access_log.site_id ORDER BY access_log.count;
-
-INSERT INTO Websites(id, name, alexa, country) VALUES (4, "weibo", 20, "CN");
+SELECT * FROM Websites WHERE name LIKE "%oo%";

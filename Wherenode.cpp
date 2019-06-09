@@ -30,7 +30,8 @@ void BuildWhereTree(Wherenode* node, string word[], int st, int ed, Table* mytab
 						type = iter->type;			
 				}				
 				node->datatype = type;
-				node->data = info;
+				if(type=="char") node->data = info.substr(1, info.length() - 2);
+				else node->data = info;
 				node->type = '=';
 			}
 			else if(word[st].find('<') != -1) {
@@ -43,7 +44,8 @@ void BuildWhereTree(Wherenode* node, string word[], int st, int ed, Table* mytab
 						type = iter->type;			
 				}				
 				node->datatype = type;
-				node->data = info;
+				if(type=="char") node->data = info.substr(1, info.length() - 2);
+				else node->data = info;
 				node->type = '<';
 			}
 			else if(word[st].find('>') != -1) {
@@ -56,7 +58,8 @@ void BuildWhereTree(Wherenode* node, string word[], int st, int ed, Table* mytab
 						type = iter->type;			
 				}				
 				node->datatype = type;
-				node->data = info;
+				if(type=="char") node->data = info.substr(1, info.length() - 2);
+				else node->data = info;
 				node->type = '>';
 			}
 		}
@@ -219,7 +222,7 @@ std::set<Data> getWhereKeys(Wherenode *rootnode, Table *mytable)//ÊÊÅäÆ÷Ä£Ê½
 
 bool Like(string a, string b)
 {
-	cout<<"### "<<a<<' '<<b<<endl;
+//	cout<<"### "<<a<<' '<<b<<endl;
 	if(a == "" && b == "") return true;
 	if(a == "%") return true;
 	int p = 0;
@@ -234,7 +237,7 @@ bool Like(string a, string b)
 		}
 		p++;
 	}
-	cout<<"more "<<more<<' '<<"least "<<least <<endl;
+//	cout<<"more "<<more<<' '<<"least "<<least <<endl;
 	b = b.substr(least);
 	if(p != 0 && !more)
 		return Like(a.substr(p), b);
@@ -243,7 +246,7 @@ bool Like(string a, string b)
 		while(p2 < a.size() && a[p2] != '%' && a[p2] != '_')
 			p2++;
 		string sub = a.substr(p, p2-1);
-		cout<<"sub "<<sub<<endl;
+//		cout<<"sub "<<sub<<endl;
 		bool value = 0;
 		while(b.find(sub) != -1) {
 			int pos = b.find(sub);
@@ -271,13 +274,13 @@ std::set<Data> getWhereLikeKeys(Table *mytable, string clause)
 	string column = clause.substr(0, likepos-1);
 	string likestring = clause.substr(likepos+5);
 	likestring = likestring.substr(1, likestring.length() - 2); 
-	cout<<"COLUMN!!! "<<column<<' '<<likestring<<endl;
+//	cout<<"COLUMN!!! "<<column<<' '<<likestring<<endl;
 	
 	std::set<Data> Dataset;
 	for(auto i: mytable->row_map) {
 		if(Like(likestring, i.second.data[column]))
 			Dataset.insert(i.first);
-		cout<<likestring<<' '<<i.second.data[column]<<endl;
+//		cout<<likestring<<' '<<i.second.data[column]<<endl;
 	}
 	return Dataset;
 }
