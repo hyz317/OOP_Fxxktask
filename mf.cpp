@@ -36,7 +36,7 @@ bool MathFunction::Deal()
 	{
 	this->Space();return 1;
 	}
-	if(Finds(word,"LEFT",how_many_word)!=-1)
+	if(Finds(word,"LEFT",how_many_word)!=-1 && Finds(word,"JOIN",how_many_word)==-1)
 	{
 	this->Left();return 1;
 	}

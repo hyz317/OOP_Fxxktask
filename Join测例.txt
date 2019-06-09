@@ -1,0 +1,25 @@
+CREATE DATABASE OOP;
+USE OOP;
+CREATE TABLE access_log(aid INT NOT NULL, PRIMARY KEY(aid), site_id INT, count INT, date DATE);
+CREATE TABLE Websites(id INT NOT NULL, PRIMARY KEY(id), name CHAR, alexa INT, country CHAR);
+INSERT INTO Websites(id, name, alexa, country) VALUES (1, "Google", 1, "USA");
+INSERT INTO Websites(id, name, alexa, country) VALUES (2, "Taobao", 13, "CN");
+INSERT INTO Websites(id, name, alexa, country) VALUES (3, "runoob", 4689, "CN");
+INSERT INTO Websites(id, name, alexa, country) VALUES (4, "weibo", 20, "CN");
+INSERT INTO Websites(id, name, alexa, country) VALUES (5, "Facebook", 3, "USA");
+INSERT INTO Websites(id, name, alexa, country) VALUES (7, "stackoverflow", 0, "IND");
+
+INSERT INTO access_log(aid, site_id, count, date) VALUES (1, 1, 45, "2016-05-10");
+INSERT INTO access_log(aid, site_id, count, date) VALUES (2, 3, 100, "2016-05-13");
+INSERT INTO access_log(aid, site_id, count, date) VALUES (3, 1, 230, "2016-05-14");
+INSERT INTO access_log(aid, site_id, count, date) VALUES (4, 2, 10, "2016-05-14");
+INSERT INTO access_log(aid, site_id, count, date) VALUES (5, 5, 205, "2016-05-14");
+INSERT INTO access_log(aid, site_id, count, date) VALUES (6, 4, 13, "2016-05-15");
+INSERT INTO access_log(aid, site_id, count, date) VALUES (7, 3, 220, "2016-05-15");
+INSERT INTO access_log(aid, site_id, count, date) VALUES (8, 5, 545, "2016-05-16");
+INSERT INTO access_log(aid, site_id, count, date) VALUES (9, 3, 201, "2016-05-17");
+
+SELECT * FROM Websites;
+SELECT * FROM access_log;
+
+SELECT Websites.name, access_log.count, access_log.date FROM Websites INNER JOIN access_log ON Websites.id=access_log.site_id ORDER BY access_log.count;

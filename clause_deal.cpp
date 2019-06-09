@@ -56,20 +56,29 @@ void clause_deal(char* cmd,string command)
 		if(mathfuntion.Deal())return;
 		//wtr的第一个特判，select + count + groupby 
 		if(Find(word,"SELECT",how_many_word)!=-1&&Find(word,"COUNT",how_many_word)!=-1&&
-		Find(word,"GROUP",how_many_word)!=-1&&Find(word,"ORDER",how_many_word)==-1)Group_by(word,how_many_word); 
+		Find(word,"GROUP",how_many_word)!=-1&&Find(word,"ORDER",how_many_word)==-1&&Find(word,"UNION",how_many_word)==-1&&Find(word,"JOIN",how_many_word)==-1)
+			Group_by(word,how_many_word); 
 		
 		//新加的第二个特判，select + count + groupby + orderby 
 		if(Find(word,"SELECT",how_many_word)!=-1&&Find(word,"COUNT",how_many_word)!=-1&&
-		Find(word,"GROUP",how_many_word)!=-1&&Find(word,"ORDER",how_many_word)!=-1)Group_by(word,how_many_word,word[Find(word,"ORDER",how_many_word)+2]); 
+		Find(word,"GROUP",how_many_word)!=-1&&Find(word,"ORDER",how_many_word)!=-1&&Find(word,"UNION",how_many_word)==-1&&Find(word,"JOIN",how_many_word)==-1)
+			Group_by(word,how_many_word,word[Find(word,"ORDER",how_many_word)+2]); 
 		
 		//新加的第三个特判，select + count + orderby 
 		if(Find(word,"SELECT",how_many_word)!=-1&&Find(word,"COUNT",how_many_word)==-1&&
-		Find(word,"GROUP",how_many_word)==-1&&Find(word,"ORDER",how_many_word)!=-1&&Find(word,"UNION",how_many_word)==-1) NewSelect(word,how_many_word,WhereString,word[Find(word,"ORDER",how_many_word)+2]); 
+		Find(word,"GROUP",how_many_word)==-1&&Find(word,"ORDER",how_many_word)!=-1&&Find(word,"UNION",how_many_word)==-1&&Find(word,"JOIN",how_many_word)==-1) 
+			NewSelect(word,how_many_word,WhereString,word[Find(word,"ORDER",how_many_word)+2]); 
 //		printTempDatabaseOverall(tmp_database); // 全局输出调试语句 
 	
 		if(Find(word,"UNION",how_many_word)!=-1){
 			Union(word,how_many_word,scmd);
 		}
+		
+		if(Find(word,"SELECT",how_many_word)!=-1&&Find(word,"COUNT",how_many_word)==-1&&
+		Find(word,"JOIN",how_many_word)!=-1&&Find(word,"ORDER",how_many_word)!=-1) Join(word,how_many_word,WhereString,word[Find(word,"ORDER",how_many_word)+2]);
+		
+		if(Find(word,"SELECT",how_many_word)!=-1&&Find(word,"COUNT",how_many_word)==-1&&
+		Find(word,"JOIN",how_many_word)!=-1&&Find(word,"ORDER",how_many_word)==-1) Join(word,how_many_word,WhereString,"");
 }
 
 bool OrderByCompare2(const string &a1, const string &a2, string type) // 一个判断两个 value 大小的函数 
@@ -317,7 +326,11 @@ string GetOrderbyType(string table_name, string order_by_attr) // 用于返回需要 o
 
 bool OrderByCompare(string table_name, string order_by_attr, const Data& a1, const Data& a2, string type) //用于比较两个行所对应orderby列的值的大小 
 {
-	if(DB.current_db->table_list[table_name].row_map[a1].data[order_by_attr] == "NULL")
+	if(a1.type == "NULL")
+		return a1 < a2;
+	else if(a2.type == "NULL")
+		return a2 < a1;
+	else if(DB.current_db->table_list[table_name].row_map[a1].data[order_by_attr] == "NULL")
 		return a1 < a2;
 	else if(DB.current_db->table_list[table_name].row_map[a2].data[order_by_attr] == "NULL")
 		return a2 < a1;
@@ -497,6 +510,7 @@ void NewSelect(string *word, int how_many_word, string wherestring, string order
 void pickitem(set<vector<string>>& selected,Table table,vector<string> attrName,string wherestring,int orderbynum){
 	int count=0;
 	vector<string> temp;
+	cout<<"WHERESTRING!!! "<<wherestring<<endl;
 	if(wherestring=="NULL"){
 		for(auto i=table.row_map.begin();i!=table.row_map.end();i++){
 			temp.clear();
@@ -506,7 +520,7 @@ void pickitem(set<vector<string>>& selected,Table table,vector<string> attrName,
 			}
 			selected.insert(temp);
 		}
-	}
+	} 
 	else{
 		StringSplit(wherestring, rootnode, &table);
 		set<Data> key_of_rows=getWhereKeys(rootnode,&table);
@@ -595,6 +609,7 @@ void Union(string* word,int how_many_word,string scmd){
 	orderbytype=GetOrderbyType(tableName,orderbyattrName);
 	cout<<orderbytype<<endl;
 	u_table=DB.current_db->table_list[tableName];//因为要重新输出里面的元素所以拷贝构造一个新的没有关系
+	cout<<"word[pos+2] "<<word[pos+2]<<endl;
 	if(word[pos+2]=="WHERE"){
 		scmd=scmd.substr(scmd.find("WHERE")+6);
 		int stop=scmd.find("UNION");
@@ -697,4 +712,158 @@ void Union(string* word,int how_many_word,string scmd){
 		}
 		return;
 	}
+}
+
+void Join(string *word, int how_many_word, string wherestring, string order_by_attr) {
+	cout<<"Join\n";
+//	cout<<"wherestring "<<wherestring<<endl<<"order_by_attr "<<order_by_attr<<endl;
+
+	string order_by_table = order_by_attr.substr(0, order_by_attr.find('.'));
+	order_by_attr = order_by_attr.substr(order_by_attr.find('.') + 1);
+
+	int count_index = Find(word, "COUNT", how_many_word);
+	int from_index = Find(word, "FROM", how_many_word);
+	int join_index = Find(word, "JOIN", how_many_word);
+	int on_index = Find(word, "ON", how_many_word);
+	int where_index = Find(word, "WHERE", how_many_word);
+	
+	std::vector<std::string> table_name;	
+	std::vector<std::string> attr_name;
+	
+	string str1 = word[on_index + 1].substr(0, word[on_index + 1].find('='));
+	string str2 = word[on_index + 1].substr(word[on_index + 1].find('=') + 1);
+	
+	string MustExistTable;
+	string table1 = str1.substr(0, str1.find('.'));
+	string table2 = str2.substr(0, str2.find('.'));
+	string column1 = str1.substr(str1.find('.') + 1);
+	string column2 = str2.substr(str2.find('.') + 1);
+	for(int i = 1; word[i] != "FROM"; i++) {
+		table_name.push_back(word[i].substr(0, word[i].find('.'))); // 把所有 select 的列均放入 attr_name 这个 vector 里面备用 
+		attr_name.push_back(word[i].substr(word[i].find('.') + 1));
+	}
+	for (auto i = attr_name.begin(); i < attr_name.end() - 1; i++) {
+		std::cout << (*i) << "\t";
+	}
+	std::cout << *(attr_name.end()-1) << "\n" ;
+	
+	std::vector<Data> key_of_rows1, key_of_rows2;
+	map<Data, bool> visited1, visited2; 
+	
+	for(auto it1 = DB.current_db->table_list[table1].row_map.begin(); it1 != DB.current_db->table_list[table1].row_map.end(); it1++)
+		visited1[it1->first] = 0;
+	for(auto it2 = DB.current_db->table_list[table2].row_map.begin(); it2 != DB.current_db->table_list[table2].row_map.end(); it2++)
+		visited2[it2->first] = 0;
+
+	for(auto it1 = DB.current_db->table_list[table1].row_map.begin(); it1 != DB.current_db->table_list[table1].row_map.end(); it1++) {
+		for(auto it2 = DB.current_db->table_list[table2].row_map.begin(); it2 != DB.current_db->table_list[table2].row_map.end(); it2++) {
+			//cout<<"Compare "<<it1->second.data[column1]<<" & "<<it2->second.data[column2]<<endl;
+			if(it1->second.data[column1] == it2->second.data[column2]) {
+				key_of_rows1.push_back(it1->first);
+				key_of_rows2.push_back(it2->first);
+				visited1[it1->first] = 1;
+				visited2[it2->first] = 1;
+			}
+		}
+	}
+
+	Data nulldata;
+	nulldata.type = "NULL";
+	
+	if(Find(word, "LEFT", how_many_word) != -1) 
+		MustExistTable = word[from_index + 1];	
+	if(Find(word, "RIGHT", how_many_word) != -1)
+		MustExistTable = word[join_index + 1];
+		
+	if(MustExistTable != "") {
+		if(MustExistTable == table1) {
+			for(auto i = visited1.begin(); i != visited1.end(); i++)
+				if(i->second == 0) {
+					key_of_rows1.push_back(i->first);
+					key_of_rows2.push_back(nulldata);
+				}
+		}
+		if(MustExistTable == table2) {
+			for(auto i = visited2.begin(); i != visited2.end(); i++)
+				if(i->second == 0) {
+					key_of_rows1.push_back(nulldata);
+					key_of_rows2.push_back(i->first);
+				}
+		}
+	}
+	
+	if(order_by_attr == "") {
+		std::string value;
+		for (int i = 0; i < key_of_rows1.size(); i++) {
+			for (int j = 0; j < attr_name.size(); j++) {
+				
+				if(table_name[j] == table1 && key_of_rows1[i].type == "NULL")
+					cout<<"NULL";
+				else if(table_name[j] == table2 && key_of_rows2[i].type == "NULL")
+					cout<<"NULL";
+				else {
+					if(table_name[j] == table1)
+						value = DB.GetValue(table_name[j], attr_name[j], key_of_rows1[i].value);
+					else if(table_name[j] == table2)
+						value = DB.GetValue(table_name[j], attr_name[j], key_of_rows2[i].value);
+					else 
+						cout << "You join your horse huh???\n";
+						
+					std::string type = DB.GetType(table_name[j], attr_name[j]);
+					OutputData(value, type);
+				}
+				
+				std::cout << "\t";
+			}
+			cout<<endl;
+		}
+	}
+	else {
+		string tmp_type = GetOrderbyType(order_by_table, order_by_attr);
+		
+		while(!key_of_rows1.empty()) {
+			
+			int nowpos = 0;
+			if(order_by_table == table1) {
+				for (int i = 0; i < key_of_rows1.size(); i++) {
+					if(OrderByCompare(table1, order_by_attr, key_of_rows1[i], key_of_rows1[nowpos], tmp_type))
+						nowpos = i;
+				}
+			}
+			
+			if(order_by_table == table2) {
+				for (int i = 0; i < key_of_rows2.size(); i++) {
+					if(OrderByCompare(table2, order_by_attr, key_of_rows2[i], key_of_rows2[nowpos], tmp_type))
+						nowpos = i;
+				}
+			}
+			std::string value;
+			for (int j = 0; j < attr_name.size(); j++) {
+				
+				if(table_name[j] == table1 && key_of_rows1[nowpos].type == "NULL")
+					cout<<"NULL";
+				else if(table_name[j] == table2 && key_of_rows2[nowpos].type == "NULL")
+					cout<<"NULL";
+				else {
+					if(table_name[j] == table1)
+						value = DB.GetValue(table_name[j], attr_name[j], key_of_rows1[nowpos].value);
+					else if(table_name[j] == table2)
+						value = DB.GetValue(table_name[j], attr_name[j], key_of_rows2[nowpos].value);
+					else 
+						cout << "You join your horse huh???\n";
+						
+					std::string type = DB.GetType(table_name[j], attr_name[j]);
+					OutputData(value, type);
+				}
+				
+				std::cout << "\t";
+			}
+			cout<<endl;
+			
+			key_of_rows1.erase(key_of_rows1.begin() + nowpos);
+			key_of_rows2.erase(key_of_rows2.begin() + nowpos);
+		}
+	}
+	
+	return;
 }
