@@ -45,7 +45,7 @@ void Command::operate() {
 		Select(ss);
 	}
 	else {
-		std::cout << "Wrong command!\n";
+		//std::cout << "Wrong command!\n";
 	}
 }
 
@@ -116,7 +116,7 @@ void Create(std::stringstream& ss) {
 					tmp.type = "time";
 				}
 				else {
-					std::cout << "ERROR!\n";
+					//std::cout << "ERROR!\n";
 					return;
 				}
 				attr.push_back(tmp);
@@ -139,7 +139,7 @@ void Create(std::stringstream& ss) {
 					tmp.type = "time";
 				}
 				else {
-					std::cout << "ERROR!\n";
+					//std::cout << "ERROR!\n";
 					return;
 				}
 				attr.push_back(tmp);
@@ -162,7 +162,7 @@ void Create(std::stringstream& ss) {
 					tmp.type = "time";
 				}
 				else {
-					std::cout << "ERROR!\n";
+					//std::cout << "ERROR!\n";
 					return;
 				}
 				//待修改
@@ -195,7 +195,7 @@ void Create(std::stringstream& ss) {
 		DB.CreateTable(name, attr, _key);
 	}
 	else {
-	std::cout << "ERROR!\n";
+	//std::cout << "ERROR!\n";
 	return;
 	}
 }
@@ -220,7 +220,7 @@ void Drop(std::stringstream& ss) {
 		DB.DropTable(name);
 	}
 	else {
-		std::cout << "ERROR!\n";
+		//std::cout << "ERROR!\n";
 	}
 }
 
@@ -241,7 +241,7 @@ void Show(std::stringstream& ss) {
 		DB.ShowColumns(name);
 	}
 	else {
-		std::cout << "ERROR!\n";
+		//std::cout << "ERROR!\n";
 	}
 }
 
@@ -299,7 +299,7 @@ std::set<Data> where_clause(std::string table_name, std::string clause) {
 			it2++;
 		}
 		else {
-			std::cout << "ERROR!\n";
+			//std::cout << "ERROR!\n";
 		}
 	}
 	it1 = keys.begin();
@@ -356,7 +356,7 @@ void Insert(std::stringstream& ss) {
 			break;
 		}
 		else {
-			std::cout << "ERROR!\n";
+			//std::cout << "ERROR!\n";
 			return;
 		}
 	}
@@ -398,7 +398,7 @@ void Insert(std::stringstream& ss) {
 			}
 		}
 		else {
-			std::cout << "ERROR!\n";
+			//std::cout << "ERROR!\n";
 			return;
 		}
 	}
@@ -455,7 +455,7 @@ void OutputData(std::string value, std::string type) {
 		}
 	}
 	else {
-		std::cout << "ERROR!\n";
+		//std::cout << "ERROR!\n";
 	}
 }
 void Count(std::stringstream& ss){

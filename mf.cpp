@@ -95,8 +95,9 @@ void MathFunction::times()
 
 void MathFunction::divide()
 {
-	if(stod(word[1].substr(word[1].find('/')+1))) {
+	if(stod(word[1].substr(word[1].find('/')+1))==0) {
 		cout<<"NULL\n";
+		return;
 	}
 	cout<<word[1]<<endl;
 	cout<<stod(word[1].substr(0, word[1].find('/'))) / stod(word[1].substr(word[1].find('/') + 1))<<endl;
@@ -104,8 +105,9 @@ void MathFunction::divide()
 
 void MathFunction::DIV()
 {
-	if(word[2] == "0") {
+	if(word[3] == "0") {
 		cout<<"NULL\n";
+		return;
 	}
 	cout<<word[1]<<' '<<word[2]<<' '<<word[3]<<endl;
 	cout<<stod(word[1]) / stod(word[3])<<endl;
@@ -113,8 +115,9 @@ void MathFunction::DIV()
 
 void MathFunction::mod()
 {
-	if(word[2] == "0") {
+	if(word[3] == "0") {
 		cout<<"NULL\n";
+		return;
 	}
 	cout<<word[1]<<' '<<word[2]<<' '<<word[3]<<endl;
 	cout<<stoi(word[1]) % stoi(word[3])<<endl;

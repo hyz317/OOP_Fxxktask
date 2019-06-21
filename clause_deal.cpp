@@ -117,7 +117,7 @@ void Output(string* word,string command){
 	}
 	else{
 		check.close();
-		cout<<"输出"<<endl;
+		//cout<<"输出"<<endl;
 		fstream fout;
 		fout.open(OutFileName,ios::out);
 		streambuf* ocb=cout.rdbuf();//origin cout buffer
@@ -142,7 +142,7 @@ void Input(string* word,int how_many_word){
 	else{
 		int pos=Find(word,"TABLE",how_many_word);
 		string tableName=word[pos+1];
-		cout<<"table: "<<tableName<<endl;
+		//cout<<"table: "<<tableName<<endl;
 		vector<string> attrs;
 		for(int i=pos+2;i<how_many_word;i++){
 			attrs.push_back(word[i]);
@@ -178,7 +178,7 @@ void Input(string* word,int how_many_word){
 //group by是归哪些列 
 void Group_by(string *word,int how_many_word, string order_by_attr) // order_by_attr 是可能存在的需要 orderby 的列 
 {
-	cout<<"groupby"<<endl;
+	//cout<<"groupby"<<endl;
 	//获得count group的index 
 	int count_index=Find(word,"COUNT",how_many_word);
 	int group_index=Find(word,"GROUP",how_many_word);
@@ -187,28 +187,28 @@ void Group_by(string *word,int how_many_word, string order_by_attr) // order_by_
 	vector<string> basic; // 记录需要 select 的列名 
 	for(int i=group_index+2;i<how_many_word && word[i]!="ORDER";i++)
 	{
-		cout<<"want to push "<<word[i]<<endl;
+		//cout<<"want to push "<<word[i]<<endl;
 		basic.push_back(word[i]);
 	}
 	map<vector<string>,int> group; // select列中的每一行数据完全一样时才会被记到一个key中 
 	Database* tmp_database=DB.current_db;
-	cout<<word[count_index+3]<<endl;
+	//cout<<word[count_index+3]<<endl;
 //？？ 
 	if(tmp_database!=NULL)
 	for(auto i:tmp_database->table_list)
 	{
-		cout<<i.first<<endl;
+		//cout<<i.first<<endl;
 	}
 	Table tmp_table=tmp_database->table_list[word[count_index+3]];//找到目前使用的table
 
 	for(auto i:tmp_table.row_map) // 遍历当前 table 中的所有行 
 	{
-		cout<<"!"<<endl;
+		//cout<<"!"<<endl;
 		vector<string> tmp_row; // 每次抽出一个行，把所有数据 push 进 tmp_row 中 
 		bool ok=1; 
 		for(int j=0;j<basic.size();j++)
 		{
-			cout<<"want to back"<<i.second.data[basic[j]]<<endl;
+			//cout<<"want to back"<<i.second.data[basic[j]]<<endl;
 			if(basic[j]==count_col) //如果发现count的列
 			{
 				if(i.second.data[basic[j]]=="NULL")ok=0; // 跳过空值 
@@ -234,12 +234,12 @@ void Group_by(string *word,int how_many_word, string order_by_attr) // order_by_
 			}	
 		}	
 	}
-	cout<<"index"<<index[0]<<endl; 	
+	//cout<<"index"<<index[0]<<endl; 	
 	for(int j=1;j<count_index;j++)
 	{
 		cout<<word[j]<<'\t';
 	}
-	cout<<"COUNT\n";
+	//cout<<"COUNT\n";
 	// \t数量不知道有没有关系 
 	//以下是新增的有可能有 orderby 的输出部分 
 	if(order_by_attr == "") // 如果没有 orderby，正常输出 
@@ -292,12 +292,12 @@ void Group_by(string *word,int how_many_word, string order_by_attr) // order_by_
 }
 void Count(string* word)
 {
-	if(DB.current_db!=NULL)cout<<"Count!!"<<endl;
+	//if(DB.current_db!=NULL)cout<<"Count!!"<<endl;
 	if(word[2]=="*")
 	{
 		Database* tmp_database=DB.current_db;
 		Table tmp_table=tmp_database->table_list[word[4]];
-		cout<<"COUNT(*)"<<endl;
+		//cout<<"COUNT(*)"<<endl;
 		cout<<tmp_table.row_map.size()<<endl;
 
 	}
@@ -305,7 +305,7 @@ void Count(string* word)
 	{
 		Database* tmp_database=DB.current_db;
 		Table tmp_table=tmp_database->table_list[word[4]];
-		cout<<"COUNT("<<word[2]<<")"<<endl;
+		//cout<<"COUNT("<<word[2]<<")"<<endl;
 		
 		int outnum=0;
 		for(auto i:tmp_table.row_map) 
@@ -343,8 +343,8 @@ bool OrderByCompare(string table_name, string order_by_attr, const Data& a1, con
 }
 
 void NewSelect(string *word, int how_many_word, string wherestring, string order_by_attr) { // 用于处理 select + orderby 的情况 
-	cout<<"NewSelect\n";
-	cout<<"wherestring "<<wherestring<<endl<<"order_by_attr "<<order_by_attr<<endl;
+	//cout<<"NewSelect\n";
+	//cout<<"wherestring "<<wherestring<<endl<<"order_by_attr "<<order_by_attr<<endl;
 	int count_index = Find(word, "COUNT", how_many_word);
 	int from_index = Find(word, "FROM", how_many_word);
 	int where_index = Find(word, "WHERE", how_many_word);
@@ -521,12 +521,12 @@ void NewSelect(string *word, int how_many_word, string wherestring, string order
 void pickitem(set<vector<string>>& selected,Table table,vector<string> attrName,string wherestring,int orderbynum){
 	int count=0;
 	vector<string> temp;
-	cout<<"WHERESTRING!!! "<<wherestring<<endl;
+	//cout<<"WHERESTRING!!! "<<wherestring<<endl;
 	if(wherestring=="NULL"){
 		for(auto i=table.row_map.begin();i!=table.row_map.end();i++){
 			temp.clear();
 			for(auto j:attrName){
-				cout<<"temp_pushback "<<i->second.data[j]<<" now temp size:["<<temp.size()<<"] attrname:"<<j<<endl;
+				//cout<<"temp_pushback "<<i->second.data[j]<<" now temp size:["<<temp.size()<<"] attrname:"<<j<<endl;
 				temp.push_back(i->second.data[j]);
 			}
 			selected.insert(temp);
@@ -541,9 +541,9 @@ void pickitem(set<vector<string>>& selected,Table table,vector<string> attrName,
 			StringSplit(wherestring, rootnode, &table);
 			key_of_rows=getWhereKeys(rootnode,&table);
 		}
-		cout<<"key_of_rows"<<endl;
+		//cout<<"key_of_rows"<<endl;
 		for(auto i:key_of_rows){
-			cout<<"i "<<i.value<<endl;
+			//cout<<"i "<<i.value<<endl;
 			temp.clear();
 			for(auto j:attrName){
 				temp.push_back(table.row_map[i].data[j]);
@@ -559,7 +559,7 @@ void multipickitem(multiset<vector<string>>& multiselected,Table table,vector<st
 		for(auto i=table.row_map.begin();i!=table.row_map.end();i++){
 			temp.clear();
 			for(auto j:attrName){
-				cout<<"temp_pushback "<<i->second.data[j]<<" now temp size:["<<temp.size()<<"] attrname:"<<j<<endl;
+				//cout<<"temp_pushback "<<i->second.data[j]<<" now temp size:["<<temp.size()<<"] attrname:"<<j<<endl;
 				temp.push_back(i->second.data[j]);
 			}
 			multiselected.insert(temp);
@@ -619,20 +619,20 @@ void Union(string* word,int how_many_word,string scmd){
 	p=word;
 	pos=Find(p,"FROM",how_many_word);//如果用UNION的话，最后一个UNION后面的那张表的信息不好弄
 	orderbyattrName=word[Find(p,"ORDER",how_many_word)+2];
-	cout<<orderbyattrName<<endl;
+	//cout<<orderbyattrName<<endl;
 	for(int i=Find(p,"SELECT",how_many_word)+1;i<pos;i++){
 		attrName.push_back(p[i]);
-		cout<<"attrname.push_back "<<word[i]<<endl;
+		//cout<<"attrname.push_back "<<word[i]<<endl;
 		if(word[i]==orderbyattrName){
 			orderbynum=i-Find(p,"SELECT",how_many_word)-1;
 		}
 	}
 	tableName=p[pos+1];
-	cout<<tableName<<endl;
+	//cout<<tableName<<endl;
 	orderbytype=GetOrderbyType(tableName,orderbyattrName);
-	cout<<orderbytype<<endl;
+	//cout<<orderbytype<<endl;
 	u_table=DB.current_db->table_list[tableName];//因为要重新输出里面的元素所以拷贝构造一个新的没有关系
-	cout<<"word[pos+2] "<<word[pos+2]<<endl;
+	//cout<<"word[pos+2] "<<word[pos+2]<<endl;
 	if(word[pos+2]=="WHERE"){
 		scmd=scmd.substr(scmd.find("WHERE")+6);
 		int stop=scmd.find("UNION");
@@ -640,7 +640,7 @@ void Union(string* word,int how_many_word,string scmd){
 			stop=scmd.find("ORDER");
 		}
 		wherestr=scmd.substr(0,stop-1);//第二个参数是长度，不过是从0开始所以无所谓
-		cout<<"wherestr "<<wherestr<<endl; 
+		//cout<<"wherestr "<<wherestr<<endl; 
 	}
 	
 	if(!multi){
@@ -657,7 +657,7 @@ void Union(string* word,int how_many_word,string scmd){
 		attrName.clear();//可能表头的名称不一样，所以每次都要重新读 
 		for(int i=Find(p,"SELECT",how_many_word)+1;i<pos;i++){
 			attrName.push_back(p[i]);//看的是p的第几个！所以得是p[i]而非word[i] 
-			cout<<"attr.name_push_back "<<p[i]<<endl;
+			//cout<<"attr.name_push_back "<<p[i]<<endl;
 		}
 		tableName=p[pos+1];//pos是对p的相对位置呀 
 		u_table=DB.current_db->table_list[tableName];
@@ -668,7 +668,7 @@ void Union(string* word,int how_many_word,string scmd){
 				stop=scmd.find("ORDER");
 			}
 			wherestr=scmd.substr(0,stop-1);//第二个参数是长度，不过是从0开始所以无所谓 
-			cout<<"wherestr "<<wherestr<<endl;
+			//cout<<"wherestr "<<wherestr<<endl;
 		}
 		//cout<<tableName<<endl;
 		if(!multi){
@@ -713,7 +713,7 @@ void Union(string* word,int how_many_word,string scmd){
 				minimum=*selected.begin();//minimum也要改！不然还是清除前的最小值没办法换成新的值 
 			}
 		}
-		cout<<"success"<<endl;
+		//cout<<"success"<<endl;
 		return;//记得return呀 
 	}
 	else{
@@ -738,7 +738,7 @@ void Union(string* word,int how_many_word,string scmd){
 }
 
 void Join(string *word, int how_many_word, string wherestring, string order_by_attr) {
-	cout<<"Join\n";
+	//cout<<"Join\n";
 //	cout<<"wherestring "<<wherestring<<endl<<"order_by_attr "<<order_by_attr<<endl;
 
 	string order_by_table = order_by_attr.substr(0, order_by_attr.find('.'));
