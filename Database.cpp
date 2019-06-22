@@ -1,9 +1,21 @@
 #include "Database.h"
+#include <iostream>
+#include <fstream>
+#include <windows.h>
+
+extern bool starting;
 
 void Database::CreateTable(std::string table_name, std::vector<Attribute> attr, std::string _key) {
+	if(!starting){
+		std::string filename="1"+db_name+"+"+table_name+".txt";
+		std::fstream fout(filename,std::ios::out);
+		fout.close();
+	}
 	table_list[table_name] = Table(attr, _key);
 }
 void Database::DropTable(std::string tablename) {
+	std::string dropT="1"+db_name+"+"+tablename+".txt";
+	DeleteFile(dropT.c_str());
 	table_list.erase(tablename);
 }
 

@@ -110,7 +110,7 @@ int Find(string *word,string keyword,int how_many_word) // ´Ó string Êı×éÖĞÕÒÕıÈ
 
 void Output(string* word,string command){
 	string OutFileName=word[4];//µ¥ÒıºÅÒÑ±»É¾³ı
-	fstream check;		
+	fstream check;	
 	check.open(OutFileName,ios::in);
 	if(check){
 		cout<<"ÎÄ¼şÒÑ´æÔÚ£¡»»Ò»¸öÃû×Ö°É£¡"<<endl;

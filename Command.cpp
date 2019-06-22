@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <cstring>
@@ -9,6 +10,8 @@
 #include "Wherenode.h" 
 using std::string;
 using namespace std;
+extern bool starting;
+
 void Command::operate() {
 	std::stringstream ss(command);
 	std::string cmd_type;
@@ -315,6 +318,7 @@ std::set<Data> where_clause(std::string table_name, std::string clause) {
 void Update(std::stringstream& ss) {
 	std::string table_name;
 	ss >> table_name;
+	
 	std::string tmp;
 	ss >> tmp;    //SET
 	std::string attr_name;
@@ -334,6 +338,21 @@ void Update(std::stringstream& ss) {
 	for (auto i = key_of_rows.begin(); i != key_of_rows.end(); i++) {
 		DB.Set(table_name, attr_name, value, (*i).value);
 	}
+	
+	if(!starting){
+		std::string filename="1"+DB.getname()+"+"+table_name+".txt";
+		std::fstream fout(filename,std::ios::out);
+		streambuf* ocb=cout.rdbuf();//origin cout buffer
+		streambuf* fb=fout.rdbuf();//fout buffer
+		cout.rdbuf(fb);
+		DB.current_db->ShowColumns(table_name);
+		cout<<"+++++"<<endl;
+		Command a("select * from "+table_name);
+		a.operate();
+		fout.flush();
+		fout.close();
+		cout.rdbuf(ocb);
+	}
 }
 
 void Insert(std::stringstream& ss) {
@@ -342,6 +361,7 @@ void Insert(std::stringstream& ss) {
 	std::string table_name;
 	getline(ss, table_name, '(');
 	trim(table_name);
+	
 	//ss.ignore(1);    //(
 	std::vector<std::string> attr_list;
 	while (true) {
@@ -403,6 +423,21 @@ void Insert(std::stringstream& ss) {
 		}
 	}
 	DB.InsertInto(table_name, attr_list, value_list);
+	
+	if(!starting){
+		std::string filename="1"+DB.getname()+"+"+table_name+".txt";
+		std::fstream fout(filename,std::ios::out);
+		streambuf* ocb=cout.rdbuf();//origin cout buffer
+		streambuf* fb=fout.rdbuf();//fout buffer
+		cout.rdbuf(fb);
+		DB.current_db->ShowColumns(table_name);
+		cout<<"+++++"<<endl;
+		Command a("select * from "+table_name);
+		a.operate();
+		fout.flush();
+		fout.close();
+		cout.rdbuf(ocb);
+	}
 }
 
 void Delete(std::stringstream& ss) {
@@ -410,6 +445,7 @@ void Delete(std::stringstream& ss) {
 	ss >> tmp;    //FROM
 	std::string table_name;
 	ss >> table_name;
+	
 	ss >> tmp;    //WHERE
 	std::string clause;
 	getline(ss, clause, ';');
@@ -417,6 +453,21 @@ void Delete(std::stringstream& ss) {
 	std::set<Data> key_of_rows = where_clause(table_name, clause);
 	for (auto i = key_of_rows.begin(); i != key_of_rows.end(); i++) {
 		DB.DeleteRow(table_name, (*i).value);
+	}
+	
+	if(!starting){
+		std::string filename="1"+DB.getname()+"+"+table_name+".txt";
+		std::fstream fout(filename,std::ios::out);
+		streambuf* ocb=cout.rdbuf();//origin cout buffer
+		streambuf* fb=fout.rdbuf();//fout buffer
+		cout.rdbuf(fb);
+		DB.current_db->ShowColumns(table_name);
+		cout<<"+++++"<<endl;
+		Command a("select * from "+table_name);
+		a.operate();
+		fout.flush();
+		fout.close();
+		cout.rdbuf(ocb);
 	}
 }
 

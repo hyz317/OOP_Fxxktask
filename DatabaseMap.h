@@ -13,6 +13,9 @@ private:
 public:
 	Database* current_db = nullptr;
 	DatabaseMap(){};
+	std::string getname(){
+		return current_name;
+	}
 	void CreateDatabase(std::string db_name);
 	void DropDatabase (std::string db_name);
 	void UseDatabase  (std::string db_name);
