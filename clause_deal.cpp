@@ -179,7 +179,7 @@ void Input(string* word,int how_many_word){
 void Group_by(string *word,int how_many_word, string order_by_attr) // order_by_attr 是可能存在的需要 orderby 的列 
 {
 	//cout<<"groupby"<<endl;
-	//获得count group的index 
+	//获得count group的index
 	int count_index=Find(word,"COUNT",how_many_word);
 	int group_index=Find(word,"GROUP",how_many_word);
 	string count_col=word[count_index+1]; 
@@ -239,7 +239,7 @@ void Group_by(string *word,int how_many_word, string order_by_attr) // order_by_
 	{
 		cout<<word[j]<<'\t';
 	}
-	//cout<<"COUNT\n";
+	cout<<"COUNT("<<count_col<<")"<<endl;
 	// \t数量不知道有没有关系 
 	//以下是新增的有可能有 orderby 的输出部分 
 	if(order_by_attr == "") // 如果没有 orderby，正常输出 
@@ -297,7 +297,7 @@ void Count(string* word)
 	{
 		Database* tmp_database=DB.current_db;
 		Table tmp_table=tmp_database->table_list[word[4]];
-		//cout<<"COUNT(*)"<<endl;
+		cout<<"COUNT(*)"<<endl;
 		cout<<tmp_table.row_map.size()<<endl;
 
 	}
@@ -305,7 +305,7 @@ void Count(string* word)
 	{
 		Database* tmp_database=DB.current_db;
 		Table tmp_table=tmp_database->table_list[word[4]];
-		//cout<<"COUNT("<<word[2]<<")"<<endl;
+		cout<<"COUNT("<<word[2]<<")"<<endl;
 		
 		int outnum=0;
 		for(auto i:tmp_table.row_map) 

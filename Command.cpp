@@ -467,14 +467,17 @@ void Select(std::stringstream& ss,bool foutput) {
 	std::string tmp = "";
 	ss >> tmp;
 	if(!foutput){
-		while (tmp!="from" && tmp!="FROM") { //把要select的attrName挑出来 
+		while (tmp!="from" && tmp!="FROM") { //把要select的attrName挑出来
+			if(tmp.find("COUNT")!=-1){
+				return;
+			}
 			attr_name.push_back(tmp);
 			ss >> tmp;
 		}
 	}
 	else{
 		ss>>tmp;
-		while (tmp!="into" && tmp!="INTO") { //把要select的attrName挑出来 
+		while (tmp!="into" && tmp!="INTO") { //把要select的attrName挑出来
 			attr_name.push_back(tmp);
 			ss >> tmp;
 		}
