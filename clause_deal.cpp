@@ -70,6 +70,12 @@ void clause_deal(char* cmd,string command)
 			NewSelect(word,how_many_word,WhereString,word[Find(word,"ORDER",how_many_word)+2]); 
 //		printTempDatabaseOverall(tmp_database); // 全局输出调试语句 
 	
+		//第四个特判，select + 有机函数 
+		if(Find(word,"SELECT",how_many_word)!=-1&&Find(word,"COUNT",how_many_word)==-1&&
+		Find(word,"GROUP",how_many_word)==-1&&Find(word,"ORDER",how_many_word)==-1&&Find(word,"UNION",how_many_word)==-1&&Find(word,"JOIN",how_many_word)==-1 &&
+		(command.find("LEFT")!=-1||command.find("LCASE")!=-1||command.find("UCASE")!=-1) ) 
+			NewSelect(word,how_many_word,WhereString); 
+	
 		if(Find(word,"UNION",how_many_word)!=-1){
 			Union(word,how_many_word,scmd);
 		}
