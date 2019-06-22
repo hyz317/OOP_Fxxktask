@@ -105,7 +105,7 @@ DatabaseMap DB;
 using namespace std;
 int main()
 {
-	start();
+//	start();
 	//cout<<"start"<<endl;
 	std::string command;
 	char cmd[1200];

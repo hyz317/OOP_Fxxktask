@@ -14,6 +14,7 @@ public:
 	Wherenode *prev; 
 	Wherenode *next1;  
 	Wherenode *next2;
+	std::string func;
 };
 
 bool JudgeWhere(Wherenode*, Row*); // 用于递归处理整个树 

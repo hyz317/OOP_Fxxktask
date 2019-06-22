@@ -28,11 +28,11 @@ bool MathFunction::Deal()
 	{
 	this->Strcmp();return 1; 
 	}
-	if(Finds(word,"LCASE",how_many_word)!=-1)
+	if(Finds(word,"LCASE",how_many_word)==1)
 	{
 	this->Lcase();return 1; 
 	}
-	if(Finds(word,"UCASE",how_many_word)!=-1)
+	if(Finds(word,"UCASE",how_many_word)==1)
 	{
 	this->Ucase();return 1; 
 	}
@@ -40,7 +40,7 @@ bool MathFunction::Deal()
 	{
 	this->Space();return 1;
 	}
-	if(Finds(word,"LEFT",how_many_word)!=-1 && Finds(word,"JOIN",how_many_word)==-1)
+	if(Finds(word,"LEFT",how_many_word)==1 && Finds(word,"JOIN",how_many_word)==-1)
 	{
 	this->Left();return 1;
 	}

@@ -13,7 +13,7 @@ bool JudgeValidDate(std::string &str)
 {
 	int pos1 = str.find('-');
 	int pos2 = str.substr(pos1+1).find('-') + pos1 + 1;
-	std::cout<<"pos1 "<<pos1<<" pos2 "<<pos2<<std::endl;
+	//std::cout<<"pos1 "<<pos1<<" pos2 "<<pos2<<std::endl;
 	if(pos1 == -1 || pos2 == pos1 || pos2 == str.length() - 1) {
 		return false;
 	}
@@ -32,7 +32,7 @@ bool JudgeValidDate(std::string &str)
 			return false;
 		}
 	}
-	std::cout<<str<<" Judgetrue\n";
+	//std::cout<<str<<" Judgetrue\n";
 	return true;
 }
 

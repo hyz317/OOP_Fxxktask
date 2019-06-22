@@ -1,0 +1,53 @@
+CREATE DATABASE OOP;
+
+
+USE OOP;
+
+
+CREATE TABLE oop_info(stu_id INT NOT NULL, PRIMARY KEY(stu_id), stu_name CHAR, stu_time TIME);
+
+
+INSERT INTO oop_info(stu_id, stu_name, stu_time) VALUES (2018011243, "a", "2018-9-27 01:03:05");
+
+
+INSERT INTO oop_info(stu_id, stu_name, stu_time) VALUES (2018011043, "a", "2018-9-28 02:04:07");
+
+
+INSERT INTO oop_info(stu_id, stu_name, stu_time) VALUES (2018010243, "a", "2018-9-29 03:05");
+
+
+INSERT INTO oop_info(stu_id, stu_name, stu_time) VALUES (2018001344, "b", "2018-10-27 0");
+
+
+INSERT INTO oop_info(stu_id, stu_name, stu_time) VALUES (2018001394, "b", "2018-11--7");
+
+
+INSERT INTO oop_info(stu_id, stu_name, stu_time) VALUES (2018011445, "c", "2018-9-");
+
+
+SELECT * FROM oop_info ORDER BY stu_time;
+
+CREATE TABLE oop_info(stu_id INT NOT NULL, PRIMARY KEY(stu_id), stu_name CHAR, stu_date DATE);
+
+
+INSERT INTO oop_info(stu_id, stu_name, stu_date) VALUES (2018011243, "a", "2018-9-27");
+
+
+INSERT INTO oop_info(stu_id, stu_name, stu_date) VALUES (2018011043, "a", "2018-9-2");
+
+
+INSERT INTO oop_info(stu_id, stu_name, stu_date) VALUES (2018010243, "a", "2018-9-29 03:05");
+
+
+INSERT INTO oop_info(stu_id, stu_name, stu_date) VALUES (2018001344, "b", "2010");
+
+
+INSERT INTO oop_info(stu_id, stu_name, stu_date) VALUES (2018001394, "b", "Houhangaozu");
+
+
+INSERT INTO oop_info(stu_id, stu_name, stu_date) VALUES (2018011445, "c", "zibuyu9");
+
+
+SELECT * FROM oop_info ORDER BY stu_date;
+
+DROP DATABASE OOP;

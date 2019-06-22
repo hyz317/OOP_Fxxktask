@@ -9,11 +9,73 @@ bool Equal(string a,string b){
 	return a==b;
 }
 
+void setfieldname(Wherenode *&node, string word)
+{
+	if(word.find("LEFT") != -1) {
+		node->fieldname = word.substr(5, word.length() - 6);
+		node->func = "LEFT";
+		return;
+	}
+	if(word.find("LCASE") != -1) {
+		node->fieldname = word.substr(6, word.length() - 7);
+		node->func = "LCASE";
+		return;
+	}
+	if(word.find("UCASE") != -1) {
+		node->fieldname = word.substr(6, word.length() - 7);
+		node->func = "UCASE";
+		return;
+	}
+	
+	node->fieldname = word;
+//	cout<<"FIELDNAME!!! "<<node->fieldname<<endl;
+}
+
+string getdata(Wherenode *&node, string word, string type)
+{
+//	cout<<"WORD??? "<<word<<endl;
+	if(word.find("LEFT") != -1) {
+		string subword = word.substr(5, word.length() - 6);
+		int num = stoi(subword.substr(subword.find(',') + 1));	
+		string info = subword.substr(0, subword.find(',') - 1);
+		if(type == "char")
+			info = info.substr(1, info.length() - 2);
+		if(num >= info.length()) return info;
+//		cout<<"LEFT??? "<<info.substr(0, num)<<endl;
+		return info.substr(0, num);
+	}
+	else if(word.find("LCASE") != -1) {
+		word = word.substr(6, word.length() - 7);
+		if(type == "char")
+			word = word.substr(1, word.length() - 2);
+		for(int i=0;i<word.length();i++) {
+			if(word[i] >= 'A' && word[i] <= 'Z') word[i]+=32;
+		}
+//		cout<<"LCASE??? "<<word<<endl;
+		return word;
+	}
+	else if(word.find("UCASE") != -1) {
+		word = word.substr(6, word.length() - 7);
+		if(type == "char")
+			word = word.substr(1, word.length() - 2);
+		for(int i=0;i<word.length();i++) {
+			if(word[i] >= 'a' && word[i] <= 'z') word[i]-=32;
+		}
+//		cout<<"UCASE??? "<<word<<endl;
+		return word;
+	}
+	
+	if(type == "char")
+		word = word.substr(1, word.length() - 2);
+//	cout<<"DaTA!!!!! "<<word<<endl;
+	return word;
+}
+
 void BuildWhereTree(Wherenode* node, string word[], int st, int ed, Table* mytable)
 {
 	// 现在默认是 AND 和 OR 两侧带空格， =<> 三种operator的运算不带空格。如果带的话需要改变处理方式
 	if(st == ed) { // 如果只传进来一个string，那么意味着是一项表达式或者是一个被括号括起来的东西 
-		if(word[st].find('(') != -1) {
+		if(word[st][0] == '(') {
 			// 如果这个字串有括号，那么
 			string str = word[st].substr(1, word[st].length() - 2); // 获得把括号去掉的字符串 
 			StringSplit(str, node, mytable); // 把括号里面的语句再重新进行字符串分割 
@@ -21,45 +83,48 @@ void BuildWhereTree(Wherenode* node, string word[], int st, int ed, Table* mytab
 		}
 		else { // 如果没有括号，那么找到相应的 <>= 运算符，分割成俩串，处理后填入Wherenode的fieldname和data 
 			if(word[st].find('=') != -1) {
-				node->fieldname = word[st].substr(0, word[st].find('=')); //operator前面的子串是fieldname 
+				setfieldname(node, word[st].substr(0, word[st].find('='))); //operator前面的子串是fieldname 
 				string info = word[st].substr(word[st].find('=') + 1); //operator后面的子串是data的值（可能为int，string，double） 
 				string type;// = mydatalist->field[node->fieldname]->type; //通过row中field获取真实的type 				
 				for (auto iter = mytable->attr_list.begin(); iter != mytable->attr_list.end(); iter++)  //寰幆鍒ゆ柇宸﹀彸鏄惁涓哄睘鎬у悕
 				{
 					if(node->fieldname == iter->name)
-						type = iter->type;			
+						type = iter->type;	
+					if(node->fieldname.find(',')!=-1 && node->fieldname.substr(0, node->fieldname.find(',')) == iter->name)
+						type = iter->type;		
 				}				
 				node->datatype = type;
-				if(type=="char") node->data = info.substr(1, info.length() - 2);
-				else node->data = info;
+				node->data = getdata(node, info, type);
 				node->type = '=';
 			}
 			else if(word[st].find('<') != -1) {
-				node->fieldname = word[st].substr(0, word[st].find('<'));
+				setfieldname(node, word[st].substr(0, word[st].find('<')));
 				string info = word[st].substr(word[st].find('<') + 1);
 				string type;// = mydatalist->field[node->fieldname]->type; //通过row中field获取真实的type 				
 				for (auto iter = mytable->attr_list.begin(); iter != mytable->attr_list.end(); iter++)  //寰幆鍒ゆ柇宸﹀彸鏄惁涓哄睘鎬у悕
 				{
 					if(node->fieldname == iter->name)
-						type = iter->type;			
+						type = iter->type;	
+					if(node->fieldname.find(',')!=-1 && node->fieldname.substr(0, node->fieldname.find(',')) == iter->name)
+						type = iter->type;		
 				}				
 				node->datatype = type;
-				if(type=="char") node->data = info.substr(1, info.length() - 2);
-				else node->data = info;
+				node->data = getdata(node, info, type);
 				node->type = '<';
 			}
 			else if(word[st].find('>') != -1) {
-				node->fieldname = word[st].substr(0, word[st].find('>'));
+				setfieldname(node, word[st].substr(0, word[st].find('>')));
 				string info = word[st].substr(word[st].find('>') + 1);
 				string type;// = mydatalist->field[node->fieldname]->type; //通过row中field获取真实的type 				
 				for (auto iter = mytable->attr_list.begin(); iter != mytable->attr_list.end(); iter++)  //寰幆鍒ゆ柇宸﹀彸鏄惁涓哄睘鎬у悕
 				{
 					if(node->fieldname == iter->name)
-						type = iter->type;			
+						type = iter->type;	
+					if(node->fieldname.find(',')!=-1 && node->fieldname.substr(0, node->fieldname.find(',')) == iter->name)
+						type = iter->type;		
 				}				
 				node->datatype = type;
-				if(type=="char") node->data = info.substr(1, info.length() - 2);
-				else node->data = info;
+				node->data = getdata(node, info, type);
 				node->type = '>';
 			}
 		}
@@ -179,6 +244,27 @@ bool compareequal(const string &a1, const string &a2, string type)
 		throw("you compare you horse huh"); 
 }
 
+string func(Wherenode *&node, string str, int num)
+{
+	if(node->func == "LEFT" && num != -1) {
+		str = str.substr(0, num);
+		return str;
+	}
+	if(node->func == "LCASE") {
+		for(int i=0; i < str.length(); i++) {
+			if(str[i] >= 'A' && str[i] <= 'Z') str[i]+=32;
+		}
+		return str;
+	}
+	if(node->func == "UCASE") {
+		for(int i=0; i < str.length(); i++) {
+			if(str[i] >= 'a' && str[i] <= 'z') str[i]-=32;
+		}
+		return str;
+	}
+	return str;
+}
+
 bool JudgeWhere(Wherenode* node, Row* myrow) 
 {
 	if(node->type == 'a') { //如果是AND，递归处理两棵子树 
@@ -193,18 +279,29 @@ bool JudgeWhere(Wherenode* node, Row* myrow)
 	if(node->type == 'x') { //如果是XOR，递归处理两棵子树 
 		return JudgeWhere(node->next1, myrow) != JudgeWhere(node->next2, myrow);
 	}
+	int num = -1;
+	string str1;
+	if(node->fieldname.find(',')!=-1) {
+		str1 = myrow->data[node->fieldname.substr(0, node->fieldname.find(','))];
+		num = stoi(node->fieldname.substr(node->fieldname.find(',') + 1));
+	}
+	else
+		str1 = myrow->data[node->fieldname];
+	string str2 = node->data;
+	str1 = func(node, str1, num);
+	
 	if(node->type == '<') { //如果是operator，直接判断真假并返回True或False 
-		if(compareless(myrow->data[node->fieldname], node->data, node->datatype))
+		if(compareless(str1, str2, node->datatype))
 			return true;
 		return false;
 	}
 	if(node->type == '>') {
-		if(comparemore(myrow->data[node->fieldname], node->data, node->datatype))
+		if(comparemore(str1, str2, node->datatype))
 			return true;
 		return false;
 	}
 	if(node->type == '=') {
-		if(compareequal(myrow->data[node->fieldname], node->data, node->datatype))
+		if(compareequal(str1, str2, node->datatype))
 			return true;
 		return false;
 	}

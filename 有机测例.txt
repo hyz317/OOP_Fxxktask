@@ -1,0 +1,17 @@
+CREATE DATABASE OOP;
+
+USE OOP;
+
+CREATE TABLE oop_info(stu_id INT NOT NULL, PRIMARY KEY(stu_id), stu_name CHAR);
+
+INSERT INTO oop_info(stu_id, stu_name) VALUES (2018011243, "ca");
+
+INSERT INTO oop_info(stu_id, stu_name) VALUES (2018011344, "bb");
+
+INSERT INTO oop_info(stu_id, stu_name) VALUES (2018011445, "cc");
+
+SELECT stu_name, COUNT(*) from oop_info GROUP BY stu_name ORDER BY COUNT(*);
+SELECT stu_name stu_id from oop_info WHERE stu_name="c";
+SELECT stu_name stu_id FROM oop_info ORDER BY stu_name WHERE stu_name=LCASE("cA");
+SELECT stu_name stu_id FROM oop_info ORDER BY stu_name WHERE UCASE(stu_name)="CA";
+SELECT stu_name stu_id FROM oop_info ORDER BY stu_name WHERE LEFT(stu_name,1)="c";
