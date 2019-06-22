@@ -22,7 +22,7 @@ int cutstring(char* info,string* word){
 	return how_many_word;
 }
 
-void start(){
+void start(DatabaseMap& DB){
 	starting=true;
 	fstream check;
 	check.open("1sqltql.txt",ios::in);
@@ -33,7 +33,9 @@ void start(){
 			string word[2];
 			word[0]=info.substr(0,info.find(' '));
 			word[1]=info.substr(info.find(' ')+1);
-			DB.CreateDatabase(word[0]);
+			if(!DB.exist(word[0])){
+				DB.CreateDatabase(word[0]);
+			}
 			DB.UseDatabase(word[0]);
 			string tablename=word[1];
 			string tableFileName="1"+word[0]+"+"+tablename+".txt";
@@ -43,8 +45,6 @@ void start(){
 			vector<Attribute> attr;
 			string key;
 			while(fin.getline(Tinfo,1100)){
-				//cout<<"*"<<Tinfo<<"*\n";
-				
 				if(!strcmp(Tinfo, "+++++")){
 					break; 
 				} 
@@ -75,9 +75,10 @@ void start(){
 					key=Tword[0];
 				}
 				attr.push_back(Tattr);
-				
 			}
 			DB.current_db->CreateTable(tablename,attr,key);
+			//cout<<DB.getname()<<endl;
+			//DB.ShowColumns(tablename);
 			fin.getline(Tinfo,1100);
 			vector<string> attr_list;
 			string Aword[100];
@@ -95,6 +96,7 @@ void start(){
 				DB.current_db->table_list[tablename].insert(attr_list,value_list);
 			}
 			fin.close();
+			//cout<<"asdlfjlkj"<<endl;
 		}
 		check.close();
 	}
@@ -105,8 +107,9 @@ DatabaseMap DB;
 using namespace std;
 int main()
 {
-//	start();
+	//start(DB);
 	//cout<<"start"<<endl;
+	//DB.ShowColumns("oop_info2");
 	std::string command;
 	char cmd[1200];
 	while (cin.getline( cmd,1100, ';')){

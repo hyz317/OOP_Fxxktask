@@ -16,6 +16,14 @@ public:
 	std::string getname(){
 		return current_name;
 	}
+	bool exist(std::string databaseName){
+		if(dbs.find(databaseName)==dbs.end()){
+			return false;
+		}
+		else{
+			return true;
+		}
+	}
 	void CreateDatabase(std::string db_name);
 	void DropDatabase (std::string db_name);
 	void UseDatabase  (std::string db_name);
