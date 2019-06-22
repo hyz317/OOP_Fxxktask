@@ -3,9 +3,13 @@
 #include "mf.h"
 #include <ctime>
 #include <iomanip>
+#include "DatabaseMap.h"
+#include "Database.h"
+#include "Table.h"
+#include "Row.h"
 
 using namespace std;
-
+extern DatabaseMap DB;
 int Finds(string *word,string keyword,int how_many_word) // 从 string 数组中找正确的下标 
 {
 	for(int i=0;i<how_many_word;i++)
@@ -40,6 +44,10 @@ bool MathFunction::Deal()
 	{
 	this->Left();return 1;
 	}
+	if(Finds(word,"RIGHT",how_many_word)!=-1 && Finds(word,"JOIN",how_many_word)==-1)
+	{
+	this->Right();return 1;
+	}
 	if(Finds(word,"ADDDATE",how_many_word)!=-1)
 	{
 	this->AddDate();return 1;
@@ -72,8 +80,125 @@ bool MathFunction::Deal()
 	{
 	this->mod();return 1;
 	}
+	if(Finds(word,"AVG",how_many_word)!=-1)
+	{
+	this->Avg();return 1;
+	}
+	if(Finds(word,"MAX",how_many_word)!=-1)
+	{
+	this->Max();return 1;
+	}
+	if(Finds(word,"MIN",how_many_word)!=-1)
+	{
+	this->Min();return 1;
+	}
 	return 0;
 }
+
+
+void MathFunction::Right()
+{
+	int t=stoi(word[3]);
+	for(int i=word[2].length()-t;i!=word[2].length();i++)cout<<word[2][i];
+	cout<<endl;
+}
+
+void MathFunction::Avg()//SELECT AVG(Price) AS AveragePrice FROM Products;
+{
+//	cout<<"avg"<<endl;
+	string col=word[2];
+	string outputname=word[4];
+	string tablename=word[6];
+//	cout<<"col="<<col<<" "<<outputname<<" "<<tablename<<endl;
+	Database* tmpdatabase=DB.current_db;
+	//Table* thetable;
+	long long total=0;
+	int num=0;
+	Table newtable;
+	for(auto i:tmpdatabase->table_list)
+	{
+		if(i.first==tablename)
+		{
+			newtable=i.second;
+		}
+	}
+	for(auto i=newtable.row_map.begin();i!=newtable.row_map.end();i++)
+	{
+		total+=stol(i->second.data[col]);
+		num++;
+	}
+//	cout<<"!";
+/*	
+	for(auto i: tmpdatabase->table_list)
+	{
+		//cout<<i.first<<"&"<<tablename<<endl;
+		if(i.first==tablename)
+		{
+			thetable=&i.second;
+		}
+	}
+	int thesize=thetable->row_map.size();
+	for(auto i = thetable->row_map.begin(); i != thetable->row_map.end(); ++i)
+	{
+		if(num==thesize)break;
+		cout<<i->second.data[col]<<endl;
+		total+=stol(i->second.data[col]);
+		num++;
+	}*/
+	cout<<outputname<<endl;
+	if(num!=0)cout<<total/num<<endl;
+}
+
+void MathFunction::Max()//SELECT MAX(Price) AS AveragePrice FROM Products;
+{
+	string col=word[2];
+	string outputname=word[4];
+	string tablename=word[6];
+	Database* tmpdatabase=DB.current_db;
+	int tmpmax=-9999999;
+	int num=0;
+	Table newtable;
+	for(auto i:tmpdatabase->table_list)
+	{
+		if(i.first==tablename)
+		{
+			newtable=i.second;
+		}
+	}
+	for(auto i=newtable.row_map.begin();i!=newtable.row_map.end();i++)
+	{
+		tmpmax=max(tmpmax,stoi(i->second.data[col]));
+		num++;
+	}
+	cout<<outputname<<endl;
+	cout<<tmpmax<<endl;
+}
+
+void MathFunction::Min()//SELECT MIN(Price) AS AveragePrice FROM Products;
+{
+	string col=word[2];
+	string outputname=word[4];
+	string tablename=word[6];
+	Database* tmpdatabase=DB.current_db;
+	int tmpmin=9999999;
+	int num=0;
+	Table newtable;
+	for(auto i:tmpdatabase->table_list)
+	{
+		if(i.first==tablename)
+		{
+			newtable=i.second;
+		}
+	}
+	for(auto i=newtable.row_map.begin();i!=newtable.row_map.end();i++)
+	{
+		tmpmin=min(tmpmin,stoi(i->second.data[col]));
+		num++;
+	}
+	cout<<outputname<<endl;
+	cout<<tmpmin<<endl;
+}
+
 
 void MathFunction::plus()
 {
@@ -84,7 +209,7 @@ void MathFunction::plus()
 void MathFunction::minus()
 {
 	cout<<word[1]<<endl;
-	cout<<stod(word[1].substr(0, word[1].find('-'))) + stod(word[1].substr(word[1].find('-') + 1))<<endl;
+	cout<<stod(word[1].substr(0, word[1].find('-'))) - stod(word[1].substr(word[1].find('-') + 1))<<endl;
 }
 
 void MathFunction::times()

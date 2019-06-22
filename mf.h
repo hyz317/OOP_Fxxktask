@@ -17,11 +17,15 @@ class MathFunction{
 	}
 	~MathFunction(){};
 	bool Deal();
+	void Avg(); 
+	void Max();
+	void Min();
 	void Locate();
 	void Lcase();
 	void Ucase();
 	void Space();
 	void Left();
+	void Right();
 	void Strcmp(); 
 	void AddDate();
 	void AddTime();
