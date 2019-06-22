@@ -26,3 +26,7 @@ bool like(std::string, std::string);
 bool compareless(const std::string&, const std::string&, std::string type);
 bool comparemore(const std::string&, const std::string&, std::string type);
 bool compareequal(const std::string&, const std::string&, std::string type);
+void setfieldname(Wherenode *&, std::string);
+std::string getdata(Wherenode *&, std::string, std::string);
+std::string func(Wherenode *&, std::string, int);
+
