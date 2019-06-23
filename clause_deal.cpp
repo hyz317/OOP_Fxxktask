@@ -120,6 +120,7 @@ void Output(string* word,string command){
 	check.open(OutFileName,ios::in);
 	if(check){
 		cout<<"文件已存在！换一个名字吧！"<<endl;
+		check.close();
 	}
 	else{
 		check.close();

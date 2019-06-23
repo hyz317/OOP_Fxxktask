@@ -4,7 +4,6 @@
 #include "Database.h"
 #include <utility>
 
-
 class DatabaseMap {
 private:
 	std::map<std::string,Database> dbs;    

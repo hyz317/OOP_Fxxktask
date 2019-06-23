@@ -1,0 +1,16 @@
+CREATE DATABASE OOP;
+USE OOP;
+CREATE TABLE oop_info(stu_id INT NOT NULL, PRIMARY KEY(stu_id), stu_name CHAR);
+CREATE TABLE oop_info2(stu_id INT NOT NULL, PRIMARY KEY(stu_id), stu_name CHAR);
+INSERT INTO oop_info(stu_id, stu_name) VALUES (2018011243, "c");
+INSERT INTO oop_info2(stu_id, stu_name) VALUES (2018011043, "c");
+INSERT INTO oop_info(stu_id, stu_name) VALUES (2018010243, "c");
+INSERT INTO oop_info2(stu_id, stu_name) VALUES (2018001344, "b");
+INSERT INTO oop_info(stu_id, stu_name) VALUES (2018001394, "b");
+INSERT INTO oop_info2(stu_id, stu_name) VALUES (2018011445, "a");
+
+SHOW columns from oop_info2;
+select * from oop_info;
+SELECT stu_name FROM oop_info UNION SELECT stu_name FROM oop_info2 WHERE stu_id > 2018011000 ORDER BY stu_name;
+DELETE FROM oop_info WHERE stu_name="c";
+DROP DATABASE OOP;

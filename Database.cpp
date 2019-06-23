@@ -4,9 +4,10 @@
 #include <windows.h>
 
 extern bool starting;
+extern bool saving;
 
 void Database::CreateTable(std::string table_name, std::vector<Attribute> attr, std::string _key) {
-	if(!starting){
+	if(!starting&&saving){
 		std::string filename="1"+db_name+"+"+table_name+".txt";
 		std::fstream fout(filename,std::ios::out);
 		fout.close();
@@ -14,8 +15,11 @@ void Database::CreateTable(std::string table_name, std::vector<Attribute> attr, 
 	table_list[table_name] = Table(attr, _key);
 }
 void Database::DropTable(std::string tablename) {
-	std::string dropT="1"+db_name+"+"+tablename+".txt";
-	DeleteFile(dropT.c_str());
+	if(saving){
+		std::string dropT="1"+db_name+"+"+tablename+".txt";
+		const char* dropT_c=dropT.c_str();
+		remove(dropT_c);
+	}
 	table_list.erase(tablename);
 }
 

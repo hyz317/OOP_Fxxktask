@@ -1,8 +1,9 @@
 #include "DatabaseMap.h"
 #include <iostream>
 #include <fstream>
-#include <windows.h>
+#include <stdio.h>
 extern bool starting;
+extern bool saving;
 
 void DatabaseMap::CreateDatabase(std::string db_name) {
 	dbs[db_name] = Database(db_name);           //创立数据库
@@ -15,11 +16,19 @@ void DatabaseMap::UseDatabase(std::string db_name) {
 
 void DatabaseMap::DropDatabase(std::string db_name) {
 	Database dropDB=dbs[db_name];
-	for(auto i: dropDB.table_list){
-		std::string dropT="1"+db_name+"+"+i.first+".txt";
-		DeleteFile(dropT.c_str());
+	if(saving){
+		for(auto i: dropDB.table_list){
+			std::string dropT="1"+db_name+"+"+i.first+".txt";
+			const char* dropT_c=dropT.c_str();
+			remove(dropT_c);
+		}
 	}
 	dbs.erase(db_name);                        //删除数据库
+	if(saving&&dbs.empty()){
+		std::string a="1sqltql.txt";
+		const char* a_c=a.c_str();
+		remove(a_c);
+	}
 }
 
 
@@ -35,7 +44,7 @@ void DatabaseMap::ShowDatabases() {
 void DatabaseMap::CreateTable(std::string table_name, std::vector<Attribute> attr, std::string _key)
 {
 	current_db->CreateTable(table_name, attr, _key);
-	if(!starting){
+	if(!starting&&saving){
 		std::fstream fout("1sqltql.txt",std::ios::app);
 		fout<<getname()<<" "<<table_name<<std::endl;
 		fout.close();

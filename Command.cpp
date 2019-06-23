@@ -11,6 +11,7 @@
 using std::string;
 using namespace std;
 extern bool starting;
+extern bool saving;
 
 void Command::operate() {
 	std::stringstream ss(command);
@@ -340,7 +341,7 @@ void Update(std::stringstream& ss) {
 		DB.Set(table_name, attr_name, value, (*i).value);
 	}
 	
-	if(!starting){
+	if(!starting&&saving){
 		std::string filename="1"+DB.getname()+"+"+table_name+".txt";
 		std::fstream fout(filename,std::ios::out);
 		streambuf* ocb=cout.rdbuf();//origin cout buffer
@@ -425,7 +426,7 @@ void Insert(std::stringstream& ss) {
 	}
 	DB.InsertInto(table_name, attr_list, value_list);
 	
-	if(!starting){
+	if(!starting&&saving){
 		std::string filename="1"+DB.getname()+"+"+table_name+".txt";
 		std::fstream fout(filename,std::ios::out);
 		streambuf* ocb=cout.rdbuf();//origin cout buffer
@@ -456,7 +457,7 @@ void Delete(std::stringstream& ss) {
 		DB.DeleteRow(table_name, (*i).value);
 	}
 	
-	if(!starting){
+	if(!starting&&saving){
 		std::string filename="1"+DB.getname()+"+"+table_name+".txt";
 		std::fstream fout(filename,std::ios::out);
 		streambuf* ocb=cout.rdbuf();//origin cout buffer
