@@ -1,5 +1,6 @@
 #include"Row.h"
 #include"Table.h"
+#include <ctime>
 
 std::string getAttrType(Table* ta, const std::string &str)
 {
@@ -7,6 +8,71 @@ std::string getAttrType(Table* ta, const std::string &str)
 		if(ta->attr_list[i].name == str)
 			return ta->attr_list[i].type;
 	}
+}
+
+void MakeValidDate(std::string &str)
+{
+	int pos1 = str.find('-');
+	int pos2 = str.substr(pos1+1).find('-') + pos1 + 1;
+	int year = stoi(str.substr(0, pos1));
+	int month = stoi(str.substr(pos1 + 1, pos2));
+	int day = stoi(str.substr(pos2 + 1));
+	struct tm t1 = { 0 };
+	t1.tm_year = year - 1900; t1.tm_mon = month; t1.tm_mday = day;
+	mktime(&t1);
+	std::string newstr;
+	newstr += std::to_string(t1.tm_year + 1900);
+	newstr += '-';
+	if(t1.tm_mon < 10) newstr += '0';
+	newstr += std::to_string(t1.tm_mon);
+	newstr += '-';
+	if(t1.tm_mday < 10) newstr += '0';
+	newstr += std::to_string(t1.tm_mday);
+	str = newstr;
+}
+
+void MakeValidTime(std::string &str)
+{
+	int pos = str.find(' ');
+	std::string str1 = str.substr(0, pos);
+	std::string str2 = str.substr(pos+1);
+	int pos1 = str1.find('-');
+	int pos2 = str1.substr(pos1+1).find('-') + pos1 + 1;
+	int pos3 = str2.find(':');
+	int pos4 = str2.substr(pos3+1).find(':') + pos3 + 1;
+	
+	int year = stoi(str1.substr(0, pos1));
+	int month = stoi(str1.substr(pos1 + 1, pos2));
+	int day = stoi(str1.substr(pos2 + 1));
+	int hour = stoi(str2.substr(0, pos3));
+	int minute = stoi(str2.substr(pos3 + 1, pos4));
+	int second = stoi(str2.substr(pos4 + 1));
+	struct tm t1 = { 0 };
+	t1.tm_year = year - 1900; t1.tm_mon = month; t1.tm_mday = day;
+	t1.tm_hour = hour; t1.tm_min = minute; t1.tm_sec = second;
+	mktime(&t1);
+	
+	std::string newstr;
+	newstr += std::to_string(t1.tm_year + 1900);
+	newstr += '-';
+	if(t1.tm_mon < 10) newstr += '0';
+	newstr += std::to_string(t1.tm_mon);
+	newstr += '-';
+	if(t1.tm_mday < 10) newstr += '0';
+	newstr += std::to_string(t1.tm_mday);
+	
+	newstr += ' ';
+	
+	if(t1.tm_hour < 10) newstr += '0';
+	newstr += std::to_string(t1.tm_hour);
+	newstr += ':';
+	if(t1.tm_min < 10) newstr += '0';
+	newstr += std::to_string(t1.tm_min);
+	newstr += ':';
+	if(t1.tm_sec < 10) newstr += '0';
+	newstr += std::to_string(t1.tm_sec);
+	
+	str = newstr;
 }
 
 bool JudgeValidDate(std::string &str)
@@ -32,6 +98,7 @@ bool JudgeValidDate(std::string &str)
 			return false;
 		}
 	}
+	MakeValidDate(str);
 	//std::cout<<str<<" Judgetrue\n";
 	return true;
 }
@@ -81,6 +148,7 @@ bool JudgeValidTime(std::string &str)
 			return false;
 		}
 	}
+	MakeValidTime(str);
 	return true;
 }
 
