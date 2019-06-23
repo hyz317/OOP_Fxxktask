@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000000000
-UnitCount=17
+UnitCount=18
 
 [VersionInfo]
 Major=1
@@ -212,6 +212,16 @@ BuildCmd=
 
 [Unit17]
 FileName=Wherenode.h
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit18]
+FileName=Equal.h
 CompileCpp=1
 Folder=
 Compile=1

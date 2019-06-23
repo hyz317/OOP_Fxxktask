@@ -8,6 +8,7 @@
 #include <sstream>
 #include <set>
 #include "Wherenode.h"
+#include "Equal.h"
 extern DatabaseMap DB;
 using namespace std;
 //void Select(std::stringstream& ss,bool foutput=false);
@@ -38,7 +39,7 @@ void clause_deal(char* cmd,string command)
 			word[how_many_word++]=pdeal;
 			pdeal=strtok(NULL,"'\n ,()"); //Ö®Ç°µÄ×Ö·û´®±»ÆÆ»µÁË£¬¶øÇÒµÚ¶ş´ÎÊ¹ÓÃ¿ªÍ·µÄÖ¸Õë»á±ä³ÉNULL 
 		}
-		if(word[1]=="COUNT")Count(word); //ÏÈÃ»Çø·Ö´óĞ¡Ğ´ 
+		if(_Equal(word[1],"COUNT"))Count(word); //ÏÈÃ»Çø·Ö´óĞ¡Ğ´ 
 		//°ÑÒÑ¾­ÇĞ·Ö³É¡°µ¥´Ê¡±µÄÃüÁî´«Èëdeal_ÏµÁĞº¯ÊıÖĞ½øĞĞ´¦Àí 
 	//	deal_database(word,tmp_database,database);//Èç¹û°ÑNULL´«½øÈ¥£¬Ö»ÓĞÍ¨¹ı·µ»ØÖ¸Õë²Å¿ÉÒÔµÃµ½ĞÂÖ¸Õë 
 	//	deal_datalist(word,tmp_database,how_many_word);
@@ -89,19 +90,19 @@ void clause_deal(char* cmd,string command)
 
 bool OrderByCompare2(const string &a1, const string &a2, string type) // Ò»¸öÅĞ¶ÏÁ½¸ö value ´óĞ¡µÄº¯Êı 
 {
-	if(a1 == "NULL")
+	if(_Equal(a1 , "NULL"))
 		return a1 < a2;
-	if(a2 == "NULL")
+	if(_Equal(a2 , "NULL"))
 		return a2 < a1;
-	if(type == "int")
+	if(_Equal(type,"int"))
 		return stoi(a1) < stoi(a2);
-	if(type == "double")
+	if(_Equal(type,"double"))
 		return stod(a1) < stod(a2);
-	if(type == "char")
+	if(_Equal(type,"char"))
 		return a1 < a2; 
-	if(type == "date")
+	if(_Equal(type,"date"))
 		return a1 < a2;
-	if(type == "time")
+	if(_Equal(type,"time"))
 		return a1 < a2; 
 } 
 
@@ -109,7 +110,7 @@ int Find(string *word,string keyword,int how_many_word) // ´Ó string Êı×éÖĞÕÒÕıÈ
 {
 	for(int i=0;i<how_many_word;i++)
 	{
-		if(word[i]==keyword)return i;
+		if(_Equal(word[i],keyword))return i;
 	}
 	return -1;
 }
@@ -192,7 +193,7 @@ void Group_by(string *word,int how_many_word, string order_by_attr) // order_by_
 	string count_col=word[count_index+1]; 
 
 	vector<string> basic; // ¼ÇÂ¼ĞèÒª select µÄÁĞÃû 
-	for(int i=group_index+2;i<how_many_word && word[i]!="ORDER";i++)
+	for(int i=group_index+2;i<how_many_word && !_Equal(word[i],"ORDER");i++)
 	{
 		//cout<<"want to push "<<word[i]<<endl;
 		basic.push_back(word[i]);
@@ -218,7 +219,7 @@ void Group_by(string *word,int how_many_word, string order_by_attr) // order_by_
 			//cout<<"want to back"<<i.second.data[basic[j]]<<endl;
 			if(basic[j]==count_col) //Èç¹û·¢ÏÖcountµÄÁĞ
 			{
-				if(i.second.data[basic[j]]=="NULL")ok=0; // Ìø¹ı¿ÕÖµ 
+				if(_Equal(i.second.data[basic[j]],"NULL"))ok=0; // Ìø¹ı¿ÕÖµ 
 			} 
 			tmp_row.push_back(i.second.data[basic[j]]);
 		}
@@ -259,7 +260,7 @@ void Group_by(string *word,int how_many_word, string order_by_attr) // order_by_
 			cout<<i.second; 
 			cout<<endl;
 		}
-	else if(order_by_attr != "COUNT") { // Èç¹ûÓĞ orderby ÇÒ²»ÊÇ order Count(*)ÕâÒ»ÁĞ 
+	else if(!_Equal(order_by_attr , "COUNT")) { // Èç¹ûÓĞ orderby ÇÒ²»ÊÇ order Count(*)ÕâÒ»ÁĞ 
 		string tmp_type = GetOrderbyType(word[count_index+3], order_by_attr);
 
 		while(!group.empty()) {
@@ -317,7 +318,7 @@ void Count(string* word)
 		int outnum=0;
 		for(auto i:tmp_table.row_map) 
 		{
-			if(i.second.data[word[2]]!="NULL")outnum++;
+			if(!_Equal(i.second.data[word[2]],"NULL"))outnum++;
 		}
 		cout<<outnum<<endl;
 	}
@@ -333,19 +334,19 @@ string GetOrderbyType(string table_name, string order_by_attr) // ÓÃÓÚ·µ»ØĞèÒª o
 
 bool OrderByCompare(string table_name, string order_by_attr, const Data& a1, const Data& a2, string type) //ÓÃÓÚ±È½ÏÁ½¸öĞĞËù¶ÔÓ¦orderbyÁĞµÄÖµµÄ´óĞ¡ 
 {
-	if(a1.type == "NULL")
+	if(_Equal(a1.type , "NULL"))
 		return a1 < a2;
-	else if(a2.type == "NULL")
+	else if(_Equal(a2.type,"NULL"))
 		return a2 < a1;
 	else if(DB.current_db->table_list[table_name].row_map[a1].data[order_by_attr] == "NULL")
 		return a1 < a2;
 	else if(DB.current_db->table_list[table_name].row_map[a2].data[order_by_attr] == "NULL")
 		return a2 < a1;
-	else if(type == "int")
+	else if(_Equal(type, "int"))
 		return stoi(DB.current_db->table_list[table_name].row_map[a1].data[order_by_attr]) < stoi(DB.current_db->table_list[table_name].row_map[a2].data[order_by_attr]);
-	else if(type == "double")
+	else if(_Equal(type,"double"))
 		return stod(DB.current_db->table_list[table_name].row_map[a1].data[order_by_attr]) < stod(DB.current_db->table_list[table_name].row_map[a2].data[order_by_attr]);
-	else if(type == "char" || type == "date" || type == "time")
+	else if(_Equal(type,"char") || _Equal(type,"date") || _Equal(type,"time"))
 		return DB.current_db->table_list[table_name].row_map[a1].data[order_by_attr] < DB.current_db->table_list[table_name].row_map[a2].data[order_by_attr];
 }
 
@@ -359,7 +360,7 @@ void NewSelect(string *word, int how_many_word, string wherestring, string order
 	std::string table_name;	
 	std::vector<std::string> attr_name;
 	
-	for(int i = 1; word[i] != "FROM"; i++)
+	for(int i = 1; !_Equal(word[i],"FROM"); i++)
 		attr_name.push_back(word[i]); // °ÑËùÓĞ select µÄÁĞ¾ù·ÅÈë attr_name Õâ¸ö vector ÀïÃæ±¸ÓÃ 
 	if (attr_name[0] == "*") {
 			
@@ -529,7 +530,7 @@ void pickitem(set<vector<string>>& selected,Table table,vector<string> attrName,
 	int count=0;
 	vector<string> temp;
 	//cout<<"WHERESTRING!!! "<<wherestring<<endl;
-	if(wherestring=="NULL"){
+	if(_Equal(wherestring,"NULL")){
 		for(auto i=table.row_map.begin();i!=table.row_map.end();i++){
 			temp.clear();
 			for(auto j:attrName){
@@ -562,7 +563,7 @@ void pickitem(set<vector<string>>& selected,Table table,vector<string> attrName,
 void multipickitem(multiset<vector<string>>& multiselected,Table table,vector<string> attrName,string wherestring,int orderbynum){
 	int count=0;
 	vector<string> temp;
-	if(wherestring=="NULL"){
+	if(_Equal(wherestring,"NULL")){
 		for(auto i=table.row_map.begin();i!=table.row_map.end();i++){
 			temp.clear();
 			for(auto j:attrName){
@@ -591,13 +592,13 @@ void multipickitem(multiset<vector<string>>& multiselected,Table table,vector<st
 	}
 }
 bool UnionCompare(vector<string> v1,vector<string>v2,string orderbytype,int orderbynum){
-	if(orderbytype=="int"){
+	if(_Equal(orderbytype,"int")){
 		return stoi(v1[orderbynum])<stoi(v2[orderbynum]);
 	}
-	else if(orderbytype=="double"){
+	else if(_Equal(orderbytype,"double")){
 		return stod(v1[orderbynum])<stod(v2[orderbynum]);
 	}
-	else if(orderbytype=="char" || orderbytype=="date" || orderbytype=="time"){
+	else if(_Equal(orderbytype,"char") || _Equal(orderbytype,"date") || _Equal(orderbytype,"time")){
 		return v1[orderbynum]<v2[orderbynum];
 	}
 	else{
@@ -668,7 +669,7 @@ void Union(string* word,int how_many_word,string scmd){
 		}
 		tableName=p[pos+1];//posÊÇ¶ÔpµÄÏà¶ÔÎ»ÖÃÑ½ 
 		u_table=DB.current_db->table_list[tableName];
-		if(p[pos+2]=="WHERE"){
+		if(_Equal(p[pos+2],"WHERE")){
 			scmd=scmd.substr(scmd.find("WHERE")+6);
 			int stop=scmd.find("UNION");
 			if(stop==-1){//Èç¹ûÓĞunionµÄ»°Ò»¶¨»áÔÚorderµÄÇ°Ãæ 
@@ -768,7 +769,7 @@ void Join(string *word, int how_many_word, string wherestring, string order_by_a
 	string table2 = str2.substr(0, str2.find('.'));
 	string column1 = str1.substr(str1.find('.') + 1);
 	string column2 = str2.substr(str2.find('.') + 1);
-	for(int i = 1; word[i] != "FROM"; i++) {
+	for(int i = 1; !_Equal(word[i] ,"FROM"); i++) {
 		table_name.push_back(word[i].substr(0, word[i].find('.'))); // °ÑËùÓĞ select µÄÁĞ¾ù·ÅÈë attr_name Õâ¸ö vector ÀïÃæ±¸ÓÃ 
 		attr_name.push_back(word[i].substr(word[i].find('.') + 1));
 	}
@@ -827,9 +828,9 @@ void Join(string *word, int how_many_word, string wherestring, string order_by_a
 		for (int i = 0; i < key_of_rows1.size(); i++) {
 			for (int j = 0; j < attr_name.size(); j++) {
 				
-				if(table_name[j] == table1 && key_of_rows1[i].type == "NULL")
+				if(table_name[j] == table1 && _Equal(key_of_rows1[i].type,"NULL"))
 					cout<<"NULL";
-				else if(table_name[j] == table2 && key_of_rows2[i].type == "NULL")
+				else if(table_name[j] == table2 && _Equal(key_of_rows2[i].type,"NULL"))
 					cout<<"NULL";
 				else {
 					if(table_name[j] == table1)
@@ -870,9 +871,9 @@ void Join(string *word, int how_many_word, string wherestring, string order_by_a
 			std::string value;
 			for (int j = 0; j < attr_name.size(); j++) {
 				
-				if(table_name[j] == table1 && key_of_rows1[nowpos].type == "NULL")
+				if(table_name[j] == table1 && _Equal(key_of_rows1[nowpos].type , "NULL"))
 					cout<<"NULL";
-				else if(table_name[j] == table2 && key_of_rows2[nowpos].type == "NULL")
+				else if(table_name[j] == table2 && _Equal(key_of_rows2[nowpos].type,"NULL"))
 					cout<<"NULL";
 				else {
 					if(table_name[j] == table1)

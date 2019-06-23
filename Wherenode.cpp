@@ -38,7 +38,7 @@ string getdata(Wherenode *&node, string word, string type)
 		string subword = word.substr(5, word.length() - 6);
 		int num = stoi(subword.substr(subword.find(',') + 1));	
 		string info = subword.substr(0, subword.find(',') - 1);
-		if(type == "char")
+		if(_Equal(type, "char"))
 			info = info.substr(1, info.length() - 2);
 		if(num >= info.length()) return info;
 //		cout<<"LEFT??? "<<info.substr(0, num)<<endl;
