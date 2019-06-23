@@ -319,9 +319,12 @@ std::set<Data> getWhereKeys(Wherenode *rootnode, Table *mytable)//ÊÊÅäÆ÷Ä£Ê½
 
 bool Like(string a, string b)
 {
-//	cout<<"### "<<a<<' '<<b<<endl;
+//	cout<<"###"<<a<<'*'<<b<<'*'<<endl;
 	if(a == "" && b == "") return true;
+	if(a == "") return false; 
 	if(a == "%") return true;
+	if(b == "") return false;
+	
 	int p = 0;
 	int least = 0;
 	bool more = 0;
@@ -334,6 +337,10 @@ bool Like(string a, string b)
 		}
 		p++;
 	}
+	if(p == a.length() && more) {
+		if(least <= b.length()) return true;
+		return false;
+	}
 //	cout<<"more "<<more<<' '<<"least "<<least <<endl;
 	b = b.substr(least);
 	if(p != 0 && !more)
@@ -342,10 +349,11 @@ bool Like(string a, string b)
 		int p2 = p;
 		while(p2 < a.size() && a[p2] != '%' && a[p2] != '_')
 			p2++;
-		string sub = a.substr(p, p2-1);
-//		cout<<"sub "<<sub<<endl;
+		string sub = a.substr(p, p2-p);
+//		cout<<"sub!:"<<sub<<";b:"<<b<<endl; 
 		bool value = 0;
 		while(b.find(sub) != -1) {
+			//cout<<"sub=\""<<sub<<"\"\n";
 			int pos = b.find(sub);
 			b = b.substr(pos + sub.length());
 			value = value || Like(a.substr(p2), b);
